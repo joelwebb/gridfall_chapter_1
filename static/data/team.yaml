@@ -1,0 +1,22 @@
+
+team:
+  - id: arin
+    character: arin
+    level: 1
+    equipment:
+      - sword
+      - shield
+
+  - id: ru
+    character: ru  
+    level: 1
+    equipment:
+      - lucent_sceptre
+      - ring_of_life
+
+  - id: dante
+    character: dante
+    level: 1
+    equipment:
+      - ember_pendant
+      - breastplate
