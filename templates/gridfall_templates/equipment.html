@@ -1,0 +1,415 @@
+
+{% extends "layout.html" %}
+
+{% block stylesheets %}
+<style>
+.equipment-container {
+    display: grid;
+    grid-template-columns: minmax(250px, 1fr) minmax(200px, 0.8fr) minmax(250px, 1fr);
+    gap: 20px;
+    padding: 20px;
+}
+
+.character-preview {
+    position: relative;
+    width: 100%;
+    height: 350px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.character-preview img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.equipment-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.equipment-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.equipment-table tr {
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.equipment-table tr:hover {
+    background: #f5f5f5;
+}
+
+.equipment-table td {
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+}
+
+.character-preview {
+    position: relative;
+    width: 300px;
+    height: 400px;
+    margin: 0 auto;
+}
+
+.equipment-slot {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    transition: all 0.3s;
+}
+
+.right-hand {
+    right: 40px;
+    top: 50%;
+}
+
+.left-hand {
+    left: 40px;
+    top: 50%;
+}
+
+.chest {
+    left: 50%;
+    top: 40%;
+    transform: translateX(-50%);
+}
+
+.head {
+    left: 50%;
+    top: 15%;
+    transform: translateX(-50%);
+}
+
+.glow-effect {
+    box-shadow: 0 0 15px 5px rgba(255, 165, 0, 0.6);
+    border-color: orange;
+}
+
+.equipment-details {
+    text-align: center;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pcoded-main-container">
+    <div class="pcoded-content">
+        <div class="page-header">
+            <div class="page-block">
+                <div class="row align-items-center">
+                    <div class="col-md-12">
+                        <div class="page-header-title">
+                            <h5 class="m-b-10">Equipment Management</h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="equipment-container">
+            <!-- Stats & Abilities Card -->
+            <div class="equipment-card">
+                <h5>Categories</h5>
+                <ul class="nav nav-tabs" id="equipmentTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="weapons-tab" data-bs-toggle="tab" data-bs-target="#weapons" type="button" role="tab">
+                            <i class="feather icon-crosshair"></i> Weapons
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="armor-tab" data-bs-toggle="tab" data-bs-target="#armor" type="button" role="tab">
+                            <i class="feather icon-shield"></i> Armor
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="trinkets-tab" data-bs-toggle="tab" data-bs-target="#trinkets" type="button" role="tab">
+                            <i class="feather icon-star"></i> Trinkets
+                        </button>
+                    </li>
+                </ul>
+                <div class="tab-content p-3" id="equipmentTabContent">
+                    <div class="tab-pane fade show active" id="weapons" role="tabpanel">
+                        <table class="equipment-table">
+                            <tbody>
+                                {% for item in ['sword', 'lucent_sceptre'] %}
+                                <tr onclick="selectEquipment('{{ item }}')">
+                                    <td>{{ item|replace('_', ' ')|title }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="tab-pane fade" id="armor" role="tabpanel">
+                        <table class="equipment-table">
+                            <tbody>
+                                {% for item in ['helmet', 'breastplate'] %}
+                                <tr onclick="selectEquipment('{{ item }}')">
+                                    <td>{{ item|replace('_', ' ')|title }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="tab-pane fade" id="trinkets" role="tabpanel">
+                        <table class="equipment-table">
+                            <tbody>
+                                {% for item in ['ring_of_life', 'ember_pendant', 'shield'] %}
+                                <tr onclick="selectEquipment('{{ item }}')">
+                                    <td>{{ item|replace('_', ' ')|title }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Item Description Card -->
+            <div class="equipment-card">
+                <h5>Description</h5>
+                <div class="text-center mb-3">
+                    <div id="item-image" class="mx-auto" style="width: 25px; height: 25px; display: none;">
+                        <img src="/static/gridfall_static/assets/players/player_one.png" style="width: 100%; height: 100%; object-fit: contain;">
+                    </div>
+                </div>
+                <div class="p-3">
+                    <table class="table">
+                        <tbody>
+                            <tr>
+                                <td>Equipped Status:</td>
+                                <td id="equipped-status">-</td>
+                            </tr>
+                            <tr>
+                                <td>Character Wearing:</td>
+                                <td id="character-wearing">-</td>
+                            </tr>
+                            <tr>
+                                <td>Item Value:</td>
+                                <td id="item-value">-</td>
+                            </tr>
+                            <tr>
+                                <td>Embued Status:</td>
+                                <td id="embued-status">-</td>
+                            </tr>
+                            <tr>
+                                <td>Current Gem:</td>
+                                <td id="current-gem">
+                                    <span id="gem-info">-</span>
+                                    <a href="#" id="embue-link" class="btn btn-sm btn-primary d-none" data-bs-toggle="modal" data-bs-target="#embueModal">Click to embue</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Embue Modal -->
+                <div class="modal fade" id="embueModal" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Embue Item</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p>Select a gem to embue your item with:</p>
+                                <select class="form-select" id="gemSelect">
+                                    <option value="ruby">Ruby (+5 Attack)</option>
+                                    <option value="sapphire">Sapphire (+5 Defense)</option>
+                                    <option value="emerald">Emerald (+20 HP)</option>
+                                    <option value="diamond">Diamond (+3 All Stats)</option>
+                                </select>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-primary" onclick="embueItem()">Embue Item</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Equipment Details Card -->
+            <div class="equipment-card">
+                <h5>Details</h5>
+                <div class="equipment-details" id="equipment-details">
+                    <h6 class="mt-3">Attributes</h6>
+                    <table class="table table-bordered">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <span data-bs-toggle="tooltip" title="Base damage added to character's attack stat">Damage</span>
+                                </td>
+                                <td id="stat-damage">-</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span data-bs-toggle="tooltip" title="Defensive value that reduces incoming damage">Defense</span>
+                                </td>
+                                <td id="stat-defense">-</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span data-bs-toggle="tooltip" title="Additional health points added to base HP">HP Bonus</span>
+                                </td>
+                                <td id="stat-hp">-</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h6 class="mt-4">Abilities</h6>
+                    <table class="table table-bordered">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <span data-bs-toggle="tooltip" title="Unique effects triggered under certain conditions">Special Effect</span>
+                                </td>
+                                <td id="ability-special">-</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span data-bs-toggle="tooltip" title="Continuous effects that are always active">Passive</span>
+                                </td>
+                                <td id="ability-passive">-</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const weaponTypes = ['sword', 'lucent_sceptre'];
+const armorTypes = ['helmet', 'breastplate'];
+const trinketTypes = ['ring_of_life', 'ember_pendant', 'shield'];
+
+async function selectEquipment(item) {
+    // Show item image
+    const itemImage = document.getElementById('item-image');
+    itemImage.style.display = 'block';
+    
+    // Update description fields
+    document.getElementById('equipped-status').textContent = 'Unequipped';  // This would be dynamic in real implementation
+    document.getElementById('character-wearing').textContent = 'None';
+    document.getElementById('item-value').textContent = getItemValue(item) + ' Gold';
+    document.getElementById('embued-status').textContent = 'No';
+    document.getElementById('gem-info').textContent = 'None';
+    
+    // Show/hide embue link
+    const embueLink = document.getElementById('embue-link');
+    embueLink.classList.remove('d-none');
+    
+    try {
+        // Load item data from YAML
+        const response = await fetch(`/static/gridfall_static/equipment/${item}.yaml`);
+        const text = await response.text();
+        const data = jsyaml.load(text);
+        
+        // Update fields based on data
+        if (data.equipped) {
+            document.getElementById('equipped-status').textContent = 'Equipped';
+            document.getElementById('character-wearing').textContent = data.equippedBy || 'Unknown';
+        }
+        
+        if (data.embued) {
+            document.getElementById('embued-status').textContent = 'Yes';
+            document.getElementById('gem-info').innerHTML = `<a href="#" data-bs-toggle="modal" data-bs-target="#embueModal">${data.currentGem}</a>`;
+            embueLink.classList.add('d-none');
+        }
+    
+    try {
+        // Load item description from YAML
+        const response = await fetch(`/static/gridfall_static/equipment/${item}.yaml`);
+        const text = await response.text();
+        const data = jsyaml.load(text);
+        
+        // Update item details
+        document.querySelector('.equipment-details h5').textContent = (data.name || item).toUpperCase();
+        
+        // Update description if available
+        if (data.description) {
+            const descriptionElement = document.createElement('p');
+            descriptionElement.className = 'mt-3 mb-4';
+            descriptionElement.textContent = data.description;
+            document.querySelector('.equipment-details h5').after(descriptionElement);
+        }
+        
+        // Update stats based on YAML data
+        document.getElementById('stat-damage').textContent = data.damage || '-';
+        document.getElementById('stat-defense').textContent = data.defense || '-';
+        document.getElementById('stat-hp').textContent = data.hp_bonus || '-';
+        document.getElementById('ability-special').textContent = data.special_effect || '-';
+        document.getElementById('ability-passive').textContent = data.passive_effect || '-';
+    } catch (error) {
+        console.error('Error loading item data:', error);
+        // Fallback to basic stats
+        const stats = getItemStats(item);
+        document.getElementById('stat-damage').textContent = stats.damage || '-';
+        document.getElementById('stat-defense').textContent = stats.defense || '-';
+        document.getElementById('stat-hp').textContent = stats.hp || '-';
+        document.getElementById('ability-special').textContent = stats.special || '-';
+        document.getElementById('ability-passive').textContent = stats.passive || '-';
+    }
+    
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+}
+
+function getItemStats(item) {
+    const stats = {
+        sword: { damage: 5, special: "Critical Strike: 10% chance to deal double damage" },
+        shield: { defense: 3, passive: "Block: Reduces physical damage by 20%" },
+        helmet: { defense: 2, hp: 20 },
+        breastplate: { defense: 4, hp: 50 },
+        ring_of_life: { hp: 30, passive: "Regenerate 1 HP per turn" },
+        ember_pendant: { damage: 2, special: "Fire Damage: Adds burning effect to attacks" },
+        lucent_sceptre: { damage: 3, special: "Holy Light: Heals allies for 10% of damage dealt" }
+    };
+    
+    return stats[item] || {};
+}
+
+function getEquipmentType(item) {
+    if (weaponTypes.includes(item)) return 'Weapon';
+    if (armorTypes.includes(item)) return 'Armor';
+    return 'Trinket';
+}
+
+function getItemValue(item) {
+    const baseValues = {
+        sword: 100,
+        shield: 80,
+        helmet: 60,
+        breastplate: 120,
+        ring_of_life: 150,
+        ember_pendant: 200,
+        lucent_sceptre: 180
+    };
+    return baseValues[item] || 50;
+}
+
+function embueItem() {
+    const selectedGem = document.getElementById('gemSelect').value;
+    document.getElementById('embued-status').textContent = 'Yes';
+    document.getElementById('gem-info').innerHTML = `<a href="#" data-bs-toggle="modal" data-bs-target="#embueModal">${selectedGem}</a>`;
+    document.getElementById('embue-link').classList.add('d-none');
+    
+    // Close modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('embueModal'));
+    modal.hide();
+}
+</script>
+{% endblock content %}

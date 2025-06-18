@@ -1,0 +1,190 @@
+{% extends "layout.html" %}
+
+{% block content %}
+	<!-- [ Main Content ] start -->
+
+	<div class="pcoded-main-container">
+		<div class="pcoded-content">
+			<div class="row">
+				<div class="col-sm-12">
+					<div class="card">
+						<div class="card-header">
+							<div class="col-md-12">
+								<ul class="breadcrumb">
+									<li class="breadcrumb-item"><a href="#"><i class="feather icon-home"></i></a></li>
+									<li class="breadcrumb-item">Profile</li>
+								</ul>
+							</div>
+							<!-- side menu for card -->
+							<div class="card-header-right">
+								
+							</div>
+						
+						</div>
+
+						
+
+						<div class="card-body">
+							
+								<div class="user-about-block text-center">
+									<div class="row align-items-end">
+										<div class="col text-left pb-3">
+											
+										</div>
+										<div class="col">
+											<div class="position-relative d-inline-block">
+												<img class="img-radius img-fluid wid-80" src="https://appsrv1-147a1.kxcdn.com/gradient-pro/images/user/avatar-1.jpg" alt="User image">
+											</div>
+										</div>
+										<div class="col text-right pb-3">
+											
+										</div>
+									</div>
+								</div>
+								<div class="text-center">
+									<h6 class="mb-1 mt-3">Name</h6>
+									<p class="mb-3 text-muted">Email</p>
+								</div>
+								<hr >
+								<div class="row text-center">
+									<div class="col">
+										<h6 class="mb-1">Remaining Sessions: 0</h6>
+									</div>
+									<div class="col">
+										<h6 class="mb-1">Completed 2749 Sessions</h6>
+									</div>
+									<div class="col">
+										<div class="btn-group card-option">
+											<button type="button" class="btn dropdown-toggle btn-icon" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+												<i class="feather icon-more-horizontal"></i>
+											</button>
+											<ul class="list-unstyled card-option dropdown-menu dropdown-menu-end">
+												<li class="dropdown-item full-card">
+													<a class="dropdown-item" href="#"><i class="feather icon-upload-cloud mr-2"></i>upload Image</a>
+												</li>
+												<li>
+													<a class="dropdown-item" href="#"><i class="feather icon-trash-2 mr-2"></i>remove</a>
+												</li>
+											</ul>
+										</div>
+									</div>
+								</div>
+								<br >
+								<div class="row text-center">
+									
+									
+								</div>
+							</div>
+					</div>
+
+					<div class="card">
+						<div class="card-body">
+							<h5 class="mb-3">Default Settings</h5>
+							<div class="row">
+								<div class="col-md-3 col-sm-12">
+									<ul class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+										<li><a class="nav-link text-left active" id="v-pills-name-tab" data-toggle="pill" href="#v-pills-name" role="tab" aria-controls="v-pills-name" aria-selected="false">Name</a></li>
+										<li><a class="nav-link text-left" id="v-pills-question-tab" data-toggle="pill" href="#v-pills-question" role="tab" aria-controls="v-pills-question" aria-selected="false">Questions</a></li>
+										<li><a class="nav-link text-left" id="v-pills-voting-tab" data-toggle="pill" href="#v-pills-voting" role="tab" aria-controls="v-pills-voting" aria-selected="false">Voting</a></li>
+										<li><a class="nav-link text-left" id="v-pills-rounds-tab" data-toggle="pill" href="#v-pills-rounds" role="tab" aria-controls="v-pills-rounds" aria-selected="true">Rounds</a></li>
+									</ul>
+								</div>
+								<div class="col-md-9 col-sm-12">
+									<div class="tab-content" id="v-pills-tabContent">
+										<div class="tab-pane fade active show" id="v-pills-name" role="tabpanel" aria-labelledby="v-pills-name-tab">
+											<br>
+											<h4> Default Name </h4>
+											<p>The default name used in your sessions.</p>
+											
+											<br>
+											<input type="text" value="joe">
+											<br>
+											<br>
+											<button type="submit" class="btn  btn-primary">Save</button>
+
+										</div>
+
+										<div class="tab-pane fade" id="v-pills-question" role="tabpanel" aria-labelledby="v-pills-question-tab">
+											<br>
+											<h4 >
+												Default Question Time Limit
+											</h4>
+											<p>The default time for team members to write unique facts about themselves before starting a session.</p>
+
+											<br>
+											<div class="form-group row">
+												<div class="col-sm-5">
+													<select name="select" class="form-control">
+														<option value="opt1">30 Seconds</option>
+														<option value="opt2">45 Seconds</option>
+														<option value="opt3">60 Seconds</option>
+													</select>
+												</div>
+											</div>
+											<br>
+											<button type="submit" class="btn  btn-primary">Save</button>
+
+										</div>
+										<div class="tab-pane fade" id="v-pills-voting" role="tabpanel" aria-labelledby="v-pills-voting-tab">
+											<br>
+											<h4 class="mb-0">
+												Default Voting Time Limit
+											</h4>
+											<p>The default time for team members to vote during a session.</p>
+
+											<br>
+											<div class="form-group row">
+												<div class="col-sm-5">
+													<select name="select" class="form-control">
+														<option value="opt1">15 Seconds</option>
+														<option value="opt2">20 Seconds</option>
+														<option value="opt3">25 Seconds</option>
+													</select>
+												</div>
+											</div>
+											<br>
+											<button type="submit" class="btn  btn-primary">Save</button>
+										</div>
+										<div class="tab-pane fade show" id="v-pills-rounds" role="tabpanel" aria-labelledby="v-pills-rounds-tab">
+											<br>
+											<h4 class="mb-0">
+												Default Number of Questions
+											</h4>
+											<p>The default number of questions from each user to randomly sample from during a session.</p>
+
+											<br>
+											<div class="form-group row">
+												<div class="col-sm-5">
+													<select name="select" class="form-control">
+														<option value="opt1">1</option>
+														<option value="opt2" selected>2</option>
+														
+													</select>
+												</div>
+											</div>
+											<br>
+											<button type="submit" class="btn  btn-primary">Save</button>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+
+
+
+						
+				</div>
+
+				
+			</div>
+		</div>
+	</div>
+	<!-- [ Main Content ] end -->
+	<script src="https://appsrv1-147a1.kxcdn.com/gradient/js/vendor-all.min.js"></script>
+	<script src="https://appsrv1-147a1.kxcdn.com/gradient/js/plugins/bootstrap.min.js"></script>
+
+
+{% endblock content %}
+
+	

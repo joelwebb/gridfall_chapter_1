@@ -1,0 +1,184 @@
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Draggable Grid</title>
+    <style>
+        .card {
+            width: 527px; /* Adjusted size */
+            padding: 10px;
+            border: 1px solid #000;
+            border-radius: 5px;
+            margin: 0 auto;
+            box-sizing: border-box;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            grid-template-rows: repeat(9, 1fr);
+            gap: 10px;
+            width: 500px; /* Adjusted size */
+            height: 750px; /* Adjusted size */
+        }
+        .grid-item {
+            border: 1px solid #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        .draggable {
+            width: 85px;
+            height: 85px;
+            background-color: #fff;
+            border: 1px solid #000;
+            border-radius: 10%;
+            position: absolute;
+            bottom: 7.5px;
+            left: 7.5px;
+        }
+        .grid-item.grey {
+            background-color: #ccc; /* Grey color for rounded square */
+            border-radius: 50%;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
+</head>
+<body>
+    <div class="card">
+        <div class="header">
+            <h1>Draggable Grid</h1>
+        </div>
+        <div class="grid-container">
+            <!-- Generate grid items -->
+            <script>
+                for (let i = 0; i < 54; i++) {
+                    document.write('<div class="grid-item droppable" id="item-' + i + '"></div>');
+                }
+            </script>
+            <!-- Add draggable item -->
+            <div class="grid-item">
+                <div class="draggable" id="draggable"></div>
+            </div>
+            <!-- Add grey rounded square in the center at row 4, column 4 -->
+            <div class="grid-item grey">
+                <!-- Add content if needed -->
+            </div>
+            <!-- Add blue square in the center at row 4, column 4 -->
+            <div class="grid-item" id="center-item">
+                <div class="draggable blue" id="draggable-blue"></div>
+            </div>
+        </div>
+        <div class="footer">
+            <p>This is a small footer.</p>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <script>
+        $(function() {
+            var xSave;
+            var ySave;
+
+            // Draggable items setup
+            $(".widget").draggable({
+                containment: 'parent',
+                grid: [50, 50],
+                stack: '.widget',
+                start: function(event, ui) {
+                    xSave = $(this).position().left;
+                    ySave = $(this).position().top;
+                    var $el = $(this);
+                    var $elSibs = $(this).siblings('.widget');
+
+                    // DETECT COLLISION
+                    $elSibs.each(function() {
+                        var self = this;
+                        var $sib = $(self);
+                        collision($sib, $el);
+                    });
+                },
+                drag: function(event, ui) {
+                    var $el = $(this);
+                    var $elSibs = $(this).siblings('.widget');
+
+                    // DETECT COLLISION
+                    $elSibs.each(function() {
+                        var self = this;
+                        var $sib = $(self);
+                        collision($sib, $el);
+                    });
+                },
+                stop: function(event, ui) {
+                    var $el = $(this);
+                    var $elSibs = $(this).siblings('.widget');
+                    $el.removeClass('dragging');
+                    $elSibs.addClass('not-dragging');
+
+                    // DETECT COLLISION
+                    $elSibs.each(function() {
+                        var self = this;
+                        var $sib = $(self);
+                        collision($sib, $el);
+                        var result = collision($sib, $el);
+
+                        // if there is collision, we send back to start position.
+                        if (result == true) {
+                            $el.css({ 'top': ySave, 'left': xSave });
+                            $sib.find('.widget-inner').removeClass('collision');
+                        }
+                    });
+                }
+            });
+
+            // Collision detection
+            function collision($sib, $el) {
+                var sibInner = $sib.find('.widget-inner');
+                var wigInner = $el.find('.widget-inner');
+                var x1 = wigInner.offset().left;
+                var y1 = wigInner.offset().top;
+                var h1 = wigInner.outerHeight(true);
+                var w1 = wigInner.outerWidth(true);
+                var b1 = y1 + h1;
+                var r1 = x1 + w1;
+                var x2 = sibInner.offset().left;
+                var y2 = sibInner.offset().top;
+                var h2 = sibInner.outerHeight(true);
+                var w2 = sibInner.outerWidth(true);
+                var b2 = y2 + h2;
+                var r2 = x2 + w2;
+
+                // CHECK FOR COLLISION
+                if (
+                    (r1 >= x2 && b1 >= y2 && y1 < y2 && x1 < r2) ||
+                    (x1 <= r2 && b1 >= y2 && y1 < y2 && r1 > r2) ||
+                    (r1 >= x2 && y1 <= b2 && b1 > b2 && x1 < x2) ||
+                    (x1 <= r2 && y1 <= b2 && b1 > b2 && r1 > r2) ||
+                    (y1 == y2 && r1 == r2 && b1 == b2 && x1 == x2) ||
+                    (y1 >= y2 && x1 < r2 && b1 <= b2 && r1 > r2) ||
+                    (y1 >= y2 && r1 >= x2 && b1 <= b2 && x1 < x2) ||
+                    (x1 >= x2 && r1 <= r2 && y1 <= b2 && b1 > b2) ||
+                    (x1 >= x2 && y1 >= y2 && b1 <= b2 && r1 <= r2)
+                ) {
+                    sibInner.addClass('collision');
+                    return true;
+                } else {
+                    sibInner.removeClass('collision');
+                }
+            }
+
+            // Additional setup for blue draggable square in the center
+            $("#draggable-blue").draggable({
+                containment: '.grid-item#center-item',
+                grid: [50, 50],
+            });
+        });
+    </script>
+</body>
+</html>

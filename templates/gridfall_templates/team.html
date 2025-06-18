@@ -1,0 +1,194 @@
+
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="pcoded-main-container">
+    <div class="pcoded-content">
+        <div class="page-header">
+            <div class="page-block">
+                <div class="row align-items-center">
+                    <div class="col-md-12">
+                        <div class="page-header-title">
+                            <h5 class="m-b-10">Current Team</h5>
+                        </div>
+                        <ul class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="/"><i class="feather icon-home"></i></a></li>
+                            <li class="breadcrumb-item">{{ active_page }}</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Team Management</h5>
+                        <button class="btn btn-primary float-right" onclick="openEditTeamModal()">Edit Team</button>
+                    </div>
+                    <div class="card-body">
+                        <ul class="nav nav-tabs" id="teamTabs" role="tablist">
+                            {% for i in range(6) %}
+                            <li class="nav-item">
+                                <a class="nav-link {% if i == 0 %}active{% endif %}" id="tab-{{ i }}" data-toggle="tab" href="#content-{{ i }}" role="tab">
+                                    Slot {{ i + 1 }}
+                                </a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        <div class="tab-content" id="teamTabContent">
+                            {% for i in range(6) %}
+                            <div class="tab-pane fade {% if i == 0 %}show active{% endif %}" id="content-{{ i }}" role="tabpanel">
+                                <div class="character-slot" id="slot-{{ i }}">
+                                    <p>Empty Slot</p>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Team Modal -->
+<div class="modal fade" id="editTeamModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Select Team Members</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="character-grid" id="characterSelection">
+                    <!-- Characters will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveTeam()">Save Team</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.character-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.character-card {
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.character-card.selected {
+    border-color: #007bff;
+    background-color: rgba(0, 123, 255, 0.1);
+}
+
+.character-card img {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    margin-bottom: 0.5rem;
+}
+</style>
+
+<script>
+let selectedCharacters = new Set();
+
+async function loadCharacters() {
+    try {
+        const response = await fetch('/get_characters');
+        const characters = await response.json();
+        const grid = document.getElementById('characterSelection');
+        grid.innerHTML = characters.map(char => `
+            <div class="character-card" onclick="toggleCharacter('${char.id}', this)" data-id="${char.id}">
+                <img src="${char.image}" alt="${char.name}">
+                <h6>${char.name}</h6>
+                <p class="mb-0">${char.description}</p>
+            </div>
+        `).join('');
+    } catch (error) {
+        console.error('Error loading characters:', error);
+    }
+}
+
+function toggleCharacter(id, element) {
+    if (selectedCharacters.has(id)) {
+        selectedCharacters.delete(id);
+        element.classList.remove('selected');
+    } else {
+        if (selectedCharacters.size >= 6) {
+            alert('Teams can only have up to 6 characters');
+            return;
+        }
+        selectedCharacters.add(id);
+        element.classList.add('selected');
+    }
+}
+
+function openEditTeamModal() {
+    loadCharacters();
+    $('#editTeamModal').modal('show');
+}
+
+async function saveTeam() {
+    try {
+        const response = await fetch('/save_team', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                team: Array.from(selectedCharacters)
+            })
+        });
+        const result = await response.json();
+        if (result.success) {
+            location.reload();
+        } else {
+            alert('Error saving team');
+        }
+    } catch (error) {
+        console.error('Error saving team:', error);
+        alert('Error saving team');
+    }
+}
+
+// Initial load of current team
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        const response = await fetch('/get_current_team');
+        const team = await response.json();
+        team.forEach((character, index) => {
+            if (character) {
+                const slot = document.getElementById(`slot-${index}`);
+                slot.innerHTML = `
+                    <div class="d-flex align-items-center">
+                        <img src="${character.image}" alt="${character.name}" style="width: 48px; height: 48px; border-radius: 50%; margin-right: 1rem;">
+                        <div>
+                            <h6 class="mb-0">${character.name}</h6>
+                            <small>${character.description}</small>
+                        </div>
+                    </div>
+                `;
+            }
+        });
+    } catch (error) {
+        console.error('Error loading current team:', error);
+    }
+});
+</script>
+{% endblock %}

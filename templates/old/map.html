@@ -1,0 +1,82 @@
+{% extends "layout.html" %}
+
+{% block title %}Save Game{% endblock %}
+
+{% block content %}
+
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #1e1e1e;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+
+  .card {
+    display: flex;
+    background-color: #2b2b2b;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+    width: 1000px;
+    max-width: 95%;
+    height: 600px;
+  }
+
+  .map-area {
+    flex: 3;
+    background-image: url('https://i.imgur.com/6Y8RmBG.jpeg'); /* Placeholder map image */
+    background-size: cover;
+    background-position: center;
+    border-right: 1px solid #444;
+  }
+
+  .sidebar {
+    flex: 1;
+    background-color: #1a1a1a;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    justify-content: space-between;
+  }
+
+  .sidebar h2 {
+    color: #fff;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  .sidebar button {
+    background-color: #444;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 15px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+
+  .sidebar button:hover {
+    background-color: #666;
+  }
+</style>
+<div class="card">
+  <div class="map-area"></div>
+  <div class="sidebar">
+    <div>
+      <h2>Menu</h2>
+      <button>Team</button>
+      <button>Inventory</button>
+      <button>Save Game</button>
+      <button>Settings</button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

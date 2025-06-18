@@ -1,0 +1,196 @@
+{% extends "layout.html" %}
+
+{% block sidebar %}
+{% include 'ingame_sidebar.html' %}
+{% endblock %}
+
+{% block content %}
+
+<style>
+    .grid-container {
+        position: relative;
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        grid-template-rows: repeat(8, 1fr);
+        gap: 5px;
+        width: 500px;
+        height: 670px;
+        margin: 0 auto;
+        background-size: cover;
+    }
+
+    .grid-item {
+        border: 1px solid #000;
+        width: 80px;
+        height: 80px;
+        position: relative;
+        background-color: rgba(255, 255, 255, 0.2);
+        box-sizing: border-box;
+    }
+
+    .grid-item.highlight {
+        background-color: rgba(255, 255, 255, 0.4);
+        border: 1px solid #000;
+    }
+
+    .card {
+        width: 540px;
+        padding: 10px;
+        border: 1px solid #000;
+        border-radius: 5px;
+        margin: 0 auto;
+        box-sizing: border-box;
+    }
+
+    .header-grid {
+        display: grid;
+        grid-template-columns: repeat(4, auto);
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        margin: 10px auto;
+        width: 500px;
+        font-family: monospace;
+    }
+
+    .header-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 14px;
+    }
+</style>
+
+<div class="pcoded-main-container">
+    <div class="pcoded-content">
+        <div class="page-header">
+            <div class="page-block">
+                <div class="row align-items-center">
+                    <div class="col-md-12">
+                        <div class="page-header-title">
+                            <h5 class="m-b-10">Game</h5>
+                        </div>
+
+
+                        <div class="header-item">
+                            <span class="clock-icon">⏰</span>
+                            <span id="timer">4.000</span>
+                          </div>
+                          <div class="header-item">
+                            EXP: <span id="exp-value">0</span>
+                          </div>
+                        </div>
+                        <div style="margin-top: 20px;">
+                          <button id="pause-button">⏸️ Pause</button>
+                          <button id="exit-button">🚪 Exit</button>
+                          <button id="playButton">🎵 Music</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="card">
+                    <div class="card-body">
+                        <!-- audio -->
+                        <audio id="bg-music" loop hidden></audio>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
+                            <!-- Pause Modal -->
+            <div id="pause-modal" class="modal">
+
+                                      <div class="modal-content">
+                                        <h2>Game Paused</h2>
+                                        <button id="resume-button">Resume Game</button>
+                                        <button id="return-menu-button">Return to Main Menu</button>
+                                        <button id="leave-battle-button">Leave Battle</button>
+                                      </div>
+                                    </div>
+
+                                    <style>
+                                    .modal {
+                                      display: none;
+                                      position: fixed;
+                                      z-index: 1000;
+                                      left: 0;
+                                      top: 0;
+                                      width: 100%;
+                                      height: 100%;
+                                      background-color: rgba(0,0,0,0.7);
+                                    }
+
+                                    .modal-content {
+                                      background-color: #2d2d2d;
+                                      margin: 15% auto;
+                                      padding: 20px;
+                                      width: 300px;
+                                      border-radius: 8px;
+                                      text-align: center;
+                                    }
+
+                                    .modal-content button {
+                                      display: block;
+                                      width: 100%;
+                                      margin: 10px 0;
+                                      padding: 10px;
+                                      border: none;
+                                      border-radius: 4px;
+                                      background: #4CAF50;
+                                      color: white;
+                                      cursor: pointer;
+                                    }
+
+                                    .modal-content button:hover {
+                                      background: #45a049;
+                                    }
+                                    </style>
+
+                                <div class="grid-container" id="grid">
+                                    <script>
+                                      for (let i = 0; i < 48; i++) {
+                                        document.write('<div class="grid-item" id="tile-' + i + '"></div>');
+                                      }
+                                    </script>
+
+                                    <!-- player units -->
+                                    <div id="player-container"></div>
+
+                                    <!-- Bosses and enemies -->
+                                    <div id="enemy-container"></div>
+
+                                </div>
+                                <div style="text-align: center; position: fixed; bottom: 20px; left: 0; right: 0; z-index: 100;">
+                                    <button id="next-round" style="display: none; padding: 10px 20px; font-size: 16px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">🔄 Unlock & Next Round</button>
+                                </div>
+                            </div>
+
+                        <!-- Required CSS -->
+                        <link rel="stylesheet" href="/static/gridfall_static/assets/css/style.css">
+                        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
+
+                        <!-- load jquery minimum files -->
+                        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+                        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+                        <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+
+                        <!-- boss loading script -->
+                        <script src="/static/gridfall_static/js/boss_loader.js"></script>
+
+                        <!-- attack chain script -->
+                        <script src='/static/gridfall_static/js/attack_chain.js'></script>
+
+                        <!-- load the main game -->
+    <script>
+        // Pass the level parameter to the game
+        window.gameLevel = "{{ level }}";
+        // Only load boss if present in level
+        window.loadBossAutomatically = false;
+    </script>
+    <script src="/static/gridfall_static/js/main_game.js"></script>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

@@ -1,0 +1,137 @@
+
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="pcoded-main-container">
+    <div class="pcoded-content">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Game Lore</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <!-- Left Column - Navigation -->
+                            <div class="col-md-4">
+                                <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist">
+                                    <button class="nav-link active" id="v-pills-quests-tab" data-bs-toggle="pill" data-bs-target="#v-pills-quests" type="button" role="tab">
+                                        <i class="feather icon-book"></i> Quests
+                                    </button>
+                                    <button class="nav-link" id="v-pills-enemies-tab" data-bs-toggle="pill" data-bs-target="#v-pills-enemies" type="button" role="tab">
+                                        <i class="feather icon-target"></i> Enemies
+                                    </button>
+                                    <button class="nav-link" id="v-pills-characters-tab" data-bs-toggle="pill" data-bs-target="#v-pills-characters" type="button" role="tab">
+                                        <i class="feather icon-users"></i> Characters
+                                    </button>
+                                    <button class="nav-link" id="v-pills-history-tab" data-bs-toggle="pill" data-bs-target="#v-pills-history" type="button" role="tab">
+                                        <i class="feather icon-clock"></i> History
+                                    </button>
+                                </div>
+                                <div class="tab-content mt-3" id="v-pills-tabContent">
+                                    <div class="tab-pane fade show active" id="v-pills-quests" role="tabpanel">
+                                        <div class="list-group" id="quests-list">
+                                            <!-- Quests will be loaded here -->
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane fade" id="v-pills-enemies" role="tabpanel">
+                                        <div class="list-group" id="enemies-list">
+                                            <!-- Enemies will be loaded here -->
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane fade" id="v-pills-characters" role="tabpanel">
+                                        <div class="list-group" id="characters-list">
+                                            <!-- Characters will be loaded here -->
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane fade" id="v-pills-history" role="tabpanel">
+                                        <div class="list-group" id="history-list">
+                                            <!-- History will be loaded here -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Right Column - Content -->
+                            <div class="col-md-8">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h4 id="lore-title">Select an item to view details</h4>
+                                        <div id="lore-content" class="mt-3">
+                                            <!-- Content will be loaded here -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    loadLoreSection('quests');
+    
+    document.querySelectorAll('[data-bs-toggle="pill"]').forEach(tab => {
+        tab.addEventListener('shown.bs.tab', function(e) {
+            const section = e.target.id.split('-')[2];
+            loadLoreSection(section);
+        });
+    });
+});
+
+async function loadLoreSection(section) {
+    try {
+        const response = await fetch(`/static/lore/${section}/`);
+        const files = await response.json();
+        const listElement = document.getElementById(`${section}-list`);
+        listElement.innerHTML = '';
+        
+        for (const file of files) {
+            const itemResponse = await fetch(`/static/lore/${section}/${file}`);
+            const content = await itemResponse.text();
+            const data = jsyaml.load(content);
+            
+            const button = document.createElement('button');
+            button.className = 'list-group-item list-group-item-action';
+            button.textContent = data.title;
+            button.addEventListener('click', () => displayLoreContent(data));
+            listElement.appendChild(button);
+        }
+    } catch (error) {
+        console.error('Error loading lore:', error);
+    }
+}
+
+function displayLoreContent(data) {
+    document.getElementById('lore-title').textContent = data.title;
+    document.getElementById('lore-content').innerHTML = `
+        <div class="lore-description">
+            ${data.description}
+        </div>
+    `;
+}
+</script>
+
+<style>
+.lore-description {
+    line-height: 1.6;
+    font-size: 1.1em;
+}
+
+.nav-pills .nav-link {
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.list-group-item {
+    cursor: pointer;
+}
+</style>
+{% endblock %}

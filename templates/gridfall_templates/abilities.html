@@ -1,0 +1,199 @@
+
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="pcoded-main-container">
+    <div class="pcoded-content">
+        <div class="page-header">
+            <div class="page-block">
+                <div class="row align-items-center">
+                    <div class="col-md-12">
+                        <div class="page-header-title">
+                            <h5 class="m-b-10">Abilities</h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="card">
+                    <div class="card-body equipment-container">
+                        <!-- Category Selection Card -->
+                        <div class="equipment-card">
+                            <h5>Categories</h5>
+                            <ul class="nav nav-tabs" role="tablist">
+                                <li class="nav-item">
+                                    <a class="nav-link active" data-bs-toggle="tab" href="#offensive" role="tab">
+                                        <i class="feather icon-target"></i> Offensive
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" data-bs-toggle="tab" href="#defensive" role="tab">
+                                        <i class="feather icon-shield"></i> Defensive
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" data-bs-toggle="tab" href="#support" role="tab">
+                                        <i class="feather icon-heart"></i> Support
+                                    </a>
+                                </li>
+                            </ul>
+                            <div class="tab-content">
+                                <div class="tab-pane fade show active" id="offensive" role="tabpanel">
+                                    <table class="equipment-table">
+                                        <tbody>
+                                            {% for item in ['fireball', 'slash', 'whirling_slash'] %}
+                                            <tr onclick="selectAbility('{{ item }}')">
+                                                <td>{{ item|replace('_', ' ')|title }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="tab-pane fade" id="defensive" role="tabpanel">
+                                    <table class="equipment-table">
+                                        <tbody>
+                                            {% for item in ['holy_cross', 'blinding_light'] %}
+                                            <tr onclick="selectAbility('{{ item }}')">
+                                                <td>{{ item|replace('_', ' ')|title }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="tab-pane fade" id="support" role="tabpanel">
+                                    <table class="equipment-table">
+                                        <tbody>
+                                            {% for item in ['heal', 'chain_heal'] %}
+                                            <tr onclick="selectAbility('{{ item }}')">
+                                                <td>{{ item|replace('_', ' ')|title }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Description Card -->
+                        <div class="equipment-card">
+                            <h5>Description</h5>
+                            <div class="text-center mb-3">
+                                <div id="ability-image" class="mx-auto" style="width: 50px; height: 50px; display: none;">
+                                    <img src="" style="width: 100%; height: 100%; object-fit: contain;">
+                                </div>
+                            </div>
+                            <div class="p-3">
+                                <p id="ability-description" class="mb-4">Select an ability to view its description.</p>
+                            </div>
+                        </div>
+
+                        <!-- Stats Card -->
+                        <div class="equipment-card">
+                            <h5>Attributes</h5>
+                            <div class="p-3">
+                                <table class="table">
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                <span title="The range of the ability in tiles">Range</span>
+                                            </td>
+                                            <td id="ability-range">-</td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <span title="The amount of damage or healing this ability does">Power</span>
+                                            </td>
+                                            <td id="ability-power">-</td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <span title="Who this ability can target">Target Type</span>
+                                            </td>
+                                            <td id="ability-target">-</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+async function selectAbility(abilityName) {
+    try {
+        const response = await fetch(`/static/abilities/${abilityName}.yaml`);
+        const text = await response.text();
+        const data = jsyaml.load(text);
+        
+        // Update description
+        document.getElementById('ability-description').textContent = data.description || '-';
+        
+        // Update stats
+        document.getElementById('ability-range').textContent = data.range || '-';
+        document.getElementById('ability-power').textContent = data.damage || data.heal || '-';
+        document.getElementById('ability-target').textContent = data.target || '-';
+        
+        // Show ability image
+        const abilityImage = document.getElementById('ability-image');
+        abilityImage.style.display = 'block';
+        abilityImage.querySelector('img').src = `/static/gridfall_static/assets/abilities/${abilityName}.png`;
+    } catch (error) {
+        console.error("Error loading ability data:", error);
+    }
+}
+</script>
+
+<style>
+.equipment-container {
+    display: grid;
+    grid-template-columns: minmax(250px, 1fr) minmax(200px, 0.8fr) minmax(250px, 1fr);
+    gap: 20px;
+    padding: 20px;
+}
+
+.equipment-card {
+    background: #fff;
+    border-radius: 5px;
+    padding: 15px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+}
+
+.equipment-table {
+    width: 100%;
+}
+
+.equipment-table tr {
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.equipment-table tr:hover {
+    background-color: #f5f5f5;
+}
+
+.equipment-table td {
+    padding: 8px 12px;
+}
+
+.nav-tabs .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.nav-tabs .nav-link i {
+    font-size: 1.1em;
+}
+
+table span[title] {
+    cursor: help;
+    border-bottom: 1px dotted #666;
+}
+</style>
+{% endblock content %}

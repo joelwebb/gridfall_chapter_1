@@ -1,0 +1,112 @@
+
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="pcoded-main-container">
+    <div class="pcoded-content">
+        <div class="page-header">
+            <div class="page-block">
+                <div class="row align-items-center">
+                    <div class="col-md-12">
+                        <div class="page-header-title">
+                            <h5 class="m-b-10">Saved Game</h5>
+                        </div>
+                        <ul class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{{ url_for('home') }}"><i class="feather icon-home"></i></a></li>
+                            <li class="breadcrumb-item"><a href="#">Game</a></li>
+                            <li class="breadcrumb-item"><a href="{{ url_for('saved_game') }}">Saved Game</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <!-- Game Info Card -->
+            <div class="col-sm-12 col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Saved Game</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Game content will go here -->
+                        <div class="text-center mt-4">
+                            <a href="{{ url_for('play_game', level='level_1') }}" class="btn btn-primary btn-lg">Continue Journey</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Map Card -->
+            <div class="col-sm-12 col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Battle Map</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="map-scroll-container">
+                            <div class="game-map">
+                                <div class="player-location"></div>
+                                <div class="battle-path"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block stylesheets %}
+<style>
+.map-scroll-container {
+    overflow-x: auto;
+    overflow-y: hidden;
+    width: 100%;
+    padding: 20px 0;
+}
+
+.game-map {
+    background: url('/static/gridfall_static/assets/maps/countryside.png') no-repeat;
+    background-size: cover;
+    width: 1200px;
+    height: 400px;
+    position: relative;
+}
+
+.player-location {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 15px 5px rgba(255, 255, 255, 0.6);
+    animation: pulse 2s infinite;
+}
+
+.battle-path {
+    position: absolute;
+    top: 60%;
+    left: 30%;
+    width: 200px;
+    height: 2px;
+    background: white;
+    transform-origin: left center;
+    transform: rotate(45deg);
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 15px 5px rgba(255, 255, 255, 0.6);
+    }
+    50% {
+        box-shadow: 0 0 25px 10px rgba(255, 255, 255, 0.4);
+    }
+    100% {
+        box-shadow: 0 0 15px 5px rgba(255, 255, 255, 0.6);
+    }
+}
+</style>
+{% endblock stylesheets %}

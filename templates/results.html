@@ -1,0 +1,79 @@
+{% extends "layout.html" %}
+
+{% block content %}
+	<!-- [ Main Content ] start -->
+	<!-- chart.js -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+	
+	<script
+	src="https://code.jquery.com/jquery-3.4.1.min.js"
+	integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+	crossorigin="anonymous"></script>
+
+	<link rel="stylesheet" href="/static/assets/css/chart.css">
+
+	<div class="pcoded-main-container">
+		<div class="pcoded-content">
+			<div class="row">
+				<div class="col-sm-12">
+					<div class="card">
+						<div class="card-header">
+							<div class="col-md-12">
+								<ul class="breadcrumb">
+									<li class="breadcrumb-item"><a href="#!"><i class="feather icon-home"></i></a></li>
+									<li class="breadcrumb-item">Room / {{room_id}}</li>
+								</ul>
+							</div>
+						</div>
+
+						<div class="card-body" style="min-height:500px; height: 500px;">
+								<div class="row">
+									<div class="col-md-6">
+										<!-- TODO --- Loop over results and show -->
+
+										<article id="bar_graph">
+											Joe 
+											<div style="animation: grow5 2s forwards ease;
+											animation-delay: 1.7s;">
+												<p> 5%</p>
+											</div>
+											Rajarsi
+											<div style="animation: grow10 2s forwards ease;
+											animation-delay: 1.7s;">
+												<p> 10%</p>
+											</div>
+											Shanteria
+											<div style="animation: grow40 2s forwards ease;
+											animation-delay: 1.7s;">
+												<p>40%</p>
+											</div>
+											Karim
+											<div style="animation: grow40 2s forwards ease;
+											animation-delay: 1.7s;">
+												<p>40%</p>
+											</div>
+											Aishwarya
+											<div style="animation: grow5 2s forwards ease;
+											animation-delay: 1.7s;">
+												<p>5%</p>
+											</div>
+												</article>
+									</div>
+									<div class="col-md-6 ">
+										<strong><h3 class="d-flex text-bold justify-content-center align-items-center"> Was There A Majority? &nbsp; {{answer}}</h3></strong>
+										<!-- TODO --- show majority winner -->
+									</div>
+									
+								</div>
+							
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- [ Main Content ] end -->
+
+{% endblock content %}
+
+
