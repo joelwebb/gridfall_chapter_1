@@ -3,14 +3,14 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/Vitality-Robotics-Inc/vitality-tools#getting-started">
+  <a href="#">
     <img src="logo.png" alt="Logo">
   </a>
 
-<h3 align="center">Vitality Tools</h3>
+<h3 align="center">Gridfall Chronicles</h3>
 
   <p align="center">
-    This repo contains the serverless slackbot for vitality
+    This repo contains the gridfall App
     <br />
     <a href="#"><strong>Explore the docs »</strong></a>
     <br />
@@ -45,7 +45,7 @@
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
-This repo holds the code for launching the application running the VR slack bot
+This repo holds the code for gridfall!
 
 If you are fighting with DS_Stores, run this in your terminal and kill them all forever! 
 ```defaults write com.apple.desktopservices DSDontWriteNetworkStores true```
