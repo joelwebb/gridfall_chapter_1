@@ -4,7 +4,7 @@
 <br />
 <div align="center">
   <a href="#">
-    <img src="logo.png" alt="Logo">
+    <img src="static/logo2.png" alt="Logo">
   </a>
 
 <h3 align="center">Gridfall Chronicles</h3>
