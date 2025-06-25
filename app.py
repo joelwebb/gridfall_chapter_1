@@ -7,9 +7,6 @@ app = Flask(__name__)
 app.secret_key = "fdaexeax233272d6b9d74dd3acb43b37a39d8f1abe17"
 
 
-# Host route for the team building app
-import uuid
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -63,12 +60,12 @@ def index():
 # Routes from the original app
 @app.route('/gridfall')
 def gridfall_index():
-    return render_template("gridfall_templates/index.html")
+    return render_template("index.html")
 
 
 @app.route('/create_character')
 def create_character():
-    return render_template("gridfall_templates/create_character.html")
+    return render_template("create_character.html")
 
 
 @app.route('/load_game', methods=['GET', 'POST'])
@@ -78,34 +75,34 @@ def load_game():
         # Here you would process the save code and load the game
         # For now, just redirect to home
         return redirect(url_for('home'))
-    return render_template("gridfall_templates/load_game.html")
+    return render_template("load_game.html")
 
 
 @app.route('/map')
 def map():
-    return render_template("gridfall_templates/map.html")
+    return render_template("map.html")
 
 
 @app.route('/play_game')
 def play_game():
     level = request.args.get('level', None)
-    return render_template('gridfall_templates/play_game.html', level=level)
+    return render_template('play_game.html', level=level)
 
 @app.route('/new_play_game')
 def new_play_game():
     level = request.args.get('level', 'level_1')
-    return render_template('gridfall_templates/new_play_game.html', level=level)
+    return render_template('new_play_game.html', level=level)
 
 @app.route('/mobile_game')
 def mobile_game():
     level = request.args.get('level', 'level_1')
-    return render_template('gridfall_templates/mobile_game.html', level=level)
+    return render_template('mobile_game.html', level=level)
 
 
 @app.route('/team')
 def team():
     characters = []  # Assuming characters is defined somewhere or can be empty
-    return render_template('gridfall_templates/team.html', characters=characters, active_page='Team', request=request)
+    return render_template('team.html', characters=characters, active_page='Team', request=request)
 
 @app.route('/lore')
 def lore() -> str:
@@ -114,7 +111,7 @@ def lore() -> str:
     Returns:
         str: Rendered HTML template for game lore.
     """
-    return render_template("gridfall_templates/lore.html", active_page='Lore', request=request)
+    return render_template("lore.html", active_page='Lore', request=request)
 
 @app.route('/equipment')
 def equipment() -> str:
@@ -123,7 +120,7 @@ def equipment() -> str:
     Returns:
         str: Rendered HTML template for equipment management.
     """
-    return render_template("gridfall_templates/equipment.html",  active_page='Equipment', request=request)
+    return render_template("equipment.html",  active_page='Equipment', request=request)
 
 @app.route('/abilities')
 def abilities() -> str:
@@ -132,7 +129,7 @@ def abilities() -> str:
     Returns:
         str: Rendered HTML template for abilities management.
     """
-    return render_template("gridfall_templates/abilities.html", active_page='Abilities', request=request)
+    return render_template("abilities.html", active_page='Abilities', request=request)
 
 
 
@@ -143,7 +140,7 @@ def settings() -> str:
     Returns:
         str: Rendered HTML template for game settings.
     """
-    return render_template("gridfall_templates/settings.html", active_page='Settings', request=request)
+    return render_template("settings.html", active_page='Settings', request=request)
 
 @app.route('/tutorial')
 def tutorial() -> str:
@@ -152,7 +149,7 @@ def tutorial() -> str:
     Returns:
         str: Rendered HTML template for game tutorial.
     """
-    return render_template("gridfall_templates/tutorial.html", active_page='Tutorial', request=request)
+    return render_template("tutorial.html", active_page='Tutorial', request=request)
 
 @app.route('/logout')
 def logout():
@@ -171,14 +168,15 @@ def shop() -> str:
     Returns:
         str: Rendered HTML template for shop.
     """
-    return render_template("gridfall_templates/shop.html", active_page='Shop', request=request)
+    return render_template("shop.html", active_page='Shop', request=request)
+    
 def shop() -> str:
     """Render the game shop page.
 
     Returns:
         str: Rendered HTML template for game shop.
     """
-    return render_template("gridfall_templates/shop.html", active_page='Shop', request=request)
+    return render_template("shop.html", active_page='Shop', request=request)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

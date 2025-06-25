@@ -34,9 +34,9 @@ async function loadBossYAML(path) {
         zIndex: 2
     });
 
-    // Position on grid
-    const top = boss.row * tileSize + 7;
-    const left = boss.col * tileSize + 7;
+    // Position on grid - remove the +7 offset for proper alignment
+    const top = boss.row * tileSize;
+    const left = boss.col * tileSize;
     $boss.css({ top: `${top}px`, left: `${left}px` });
 
     // Register boss

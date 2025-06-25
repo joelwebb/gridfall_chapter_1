@@ -32,235 +32,263 @@ function startTimer() {
     $('#timer').text(formatTime(remaining));
 
     timerInterval = setInterval(() => {
-      remaining -= 10;
-      if (remaining <= 0) {
-        clearInterval(timerInterval);
-        $('#timer').text('0.000');
-        timerRunning = false;
+        remaining -= 10;
+        if (remaining <= 0) {
+            clearInterval(timerInterval);
+            $('#timer').text('0.000');
+            timerRunning = false;
 
-        if (activeDrag) {
-          lockPlayer(activeDrag);
-          activeDrag.trigger("mouseup");
-          activeDrag = null;
+            if (activeDrag) {
+                lockPlayer(activeDrag);
+                activeDrag.trigger("mouseup");
+                activeDrag = null;
+            }
+
+            // Lock rest of turn
+            turnEnded = true;
+            $(".draggable-unit").draggable("disable");
+            $("#next-round").show();
+
+
+        } else {
+            $('#timer').text(formatTime(remaining));
         }
-
-        // Lock rest of turn
-        turnEnded = true;
-        $(".draggable-unit").draggable("disable");
-        $("#next-round").show();
-   
-
-      } else {
-        $('#timer').text(formatTime(remaining));
-      }
     }, 10);
-  }
+}
 
 function stopTimer() {
     if (timerRunning) {
-      clearInterval(timerInterval);
-      timerRunning = false;
+        clearInterval(timerInterval);
+        timerRunning = false;
     }
-  }
+}
 
 function formatTime(ms) {
     return (ms / 1000).toFixed(3);
-  }
+}
 
-  function isWithinRange(posA, posB, range = 1) {
-        const dx = Math.abs(posA.col - posB.col);
-        const dy = Math.abs(posA.row - posB.row);
-        return dx <= range && dy <= range;
+function isWithinRange(posA, posB, range = 1) {
+    const dx = Math.abs(posA.col - posB.col);
+    const dy = Math.abs(posA.row - posB.row);
+    return dx <= range && dy <= range;
+}
+
+function applyDamage(unitId, amount) {
+    const hpKey = `hp_${unitId}`;
+    const current = parseInt($(`#${hpKey}`).text().replace(/[^\d]/g, '')) || 0;
+    const newHP = Math.max(0, current - amount);
+    $(`#${hpKey}`).text(`HP: ${newHP}`);
+}
+
+function applyHeal(unitId, amount) {
+    const hpKey = `hp_${unitId}`;
+    const current = parseInt($(`#${hpKey}`).text().replace(/[^\d]/g, '')) || 0;
+    const newHP = current + amount;
+    $(`#${hpKey}`).text(`HP: ${newHP}`);
+}
+
+function getOccupiedTiles($unit, width = 1, height = 1) {
+    const isBoss = $unit.hasClass("boss-unit");
+    let row, col;
+
+    if (isBoss) {
+        const r = $unit.attr("data-row");
+        const c = $unit.attr("data-col");
+
+        if (r === undefined || c === undefined) {
+            console.warn(`⚠️ Boss ${$unit.attr("id")} missing data-row or data-col.`);
+            return []; // prevent crash
         }
 
-    function applyDamage(unitId, amount) {
-        const hpKey = `hp_${unitId}`;
-        const current = parseInt($(`#${hpKey}`).text().replace(/[^\d]/g, '')) || 0;
-        const newHP = Math.max(0, current - amount);
-        $(`#${hpKey}`).text(`HP: ${newHP}`);
-        }
+        row = parseInt(r);
+        col = parseInt(c);
+    } else {
+        const pos = getGridPosition($unit);
+        row = pos.row;
+        col = pos.col;
+    }
 
-    function applyHeal(unitId, amount) {
-        const hpKey = `hp_${unitId}`;
-        const current = parseInt($(`#${hpKey}`).text().replace(/[^\d]/g, '')) || 0;
-        const newHP = current + amount;
-        $(`#${hpKey}`).text(`HP: ${newHP}`);
+    const tiles = [];
+    for (let dy = 0; dy < height; dy++) {
+        for (let dx = 0; dx < width; dx++) {
+            tiles.push({ row: row + dy, col: col + dx });
         }
+    }
+    return tiles;
+}
 
-        function getOccupiedTiles($unit, width = 1, height = 1) {
-            const isBoss = $unit.hasClass("boss-unit");
-            let row, col;
-        
-            if (isBoss) {
-                const r = $unit.attr("data-row");
-                const c = $unit.attr("data-col");
-        
-                if (r === undefined || c === undefined) {
-                    console.warn(`⚠️ Boss ${$unit.attr("id")} missing data-row or data-col.`);
-                    return []; // prevent crash
-                }
-        
-                row = parseInt(r);
-                col = parseInt(c);
-            } else {
-                const pos = getGridPosition($unit);
-                row = pos.row;
-                col = pos.col;
-            }
-        
-            const tiles = [];
-            for (let dy = 0; dy < height; dy++) {
-                for (let dx = 0; dx < width; dx++) {
-                    tiles.push({ row: row + dy, col: col + dx });
-                }
-            }
-            return tiles;
-        }
-        
-        
-        
-        function checkPincerCombat() {
-            playerIds = Object.keys(playerDataMap);
-        
-            enemyIds.forEach(enemyId => {
-                const $enemy = $("#" + enemyId);
-                const isBoss = $enemy.hasClass("boss-unit");
-                const occupiedTiles = getOccupiedTiles($enemy, isBoss ? 2 : 1, isBoss ? 2 : 1);
-        
-                const occupiedSet = new Set(occupiedTiles.map(t => `${t.row},${t.col}`));
-        
-                // LEFT-RIGHT flank check for each row of the enemy
-                const uniqueRows = [...new Set(occupiedTiles.map(t => t.row))];
-                for (const row of uniqueRows) {
-                    const colsInRow = occupiedTiles.filter(t => t.row === row).map(t => t.col);
-                    const minCol = Math.min(...colsInRow);
-                    const maxCol = Math.max(...colsInRow);
-        
-                    const leftTile = { row, col: minCol - 1 };
-                    const rightTile = { row, col: maxCol + 1 };
-        
-                    const playerLeft = playerIds.find(pid => isSamePosition(getGridPosition($("#" + pid)), leftTile));
-                    const playerRight = playerIds.find(pid => isSamePosition(getGridPosition($("#" + pid)), rightTile));
-        
-                    if (playerLeft && playerRight) {
-                        triggerPincerOn(enemyId, playerLeft, playerRight);
-                        return;
-                    }
-                }
-        
-                // TOP-BOTTOM flank check for each column of the enemy
-                const uniqueCols = [...new Set(occupiedTiles.map(t => t.col))];
-                for (const col of uniqueCols) {
-                    const rowsInCol = occupiedTiles.filter(t => t.col === col).map(t => t.row);
-                    const minRow = Math.min(...rowsInCol);
-                    const maxRow = Math.max(...rowsInCol);
-        
-                    const topTile = { row: minRow - 1, col };
-                    const bottomTile = { row: maxRow + 1, col };
-        
-                    const playerTop = playerIds.find(pid => isSamePosition(getGridPosition($("#" + pid)), topTile));
-                    const playerBottom = playerIds.find(pid => isSamePosition(getGridPosition($("#" + pid)), bottomTile));
-        
-                    if (playerTop && playerBottom) {
-                        triggerPincerOn(enemyId, playerTop, playerBottom);
-                        return;
-                    }
-                }
-            });
-        }
-        
-    
-        function triggerPincerOn(enemyId, playerA, playerB) {
-            const $enemy = $("#" + enemyId);
-            const $grid = $("#grid");
-        
-            console.log(`🗡️ Pincer Attack on ${enemyId} between ${playerA} and ${playerB}!`);
-            $enemy.addClass("pincer-attack");
-            setTimeout(() => $enemy.removeClass("pincer-attack"), 1000);
-        
-            const abilityNames = [];
-        
-            [playerA, playerB].forEach(pid => {
-                const abilities = playerDataMap[pid]?.abilities || [];
-                if (abilities.length === 0) return;
-        
-                const abilityName = abilities[0];
-                abilityNames.push(`${pid} → ${abilityName}`);
-        
-                loadAbilityYAML(abilityName).then(ability => {
-                    if (ability) {
-                        abilityDataMap[abilityName] = ability;
-        
-                        // 🌀 Trigger ability logic
-                        useAbility(pid, abilityName);
-        
-                        // ✨ Visual board effect
-                        flashBoardEffect(enemyId);
-        
-                        // Optionally could show path/effect markers on grid
-                    }
+
+
+function checkPincerCombat() {
+    playerIds = Object.keys(playerDataMap);
+
+    enemyIds.forEach(enemyId => {
+        const $enemy = $("#" + enemyId);
+        const isBoss = $enemy.hasClass("boss-unit");
+        const occupiedTiles = getOccupiedTiles($enemy, isBoss ? 2 : 1, isBoss ? 2 : 1);
+
+        // LEFT-RIGHT flank check for each row
+        for (let row = 0; row < 8; row++) {
+            const tilesInRow = occupiedTiles.filter(t => t.row === row);
+            if (tilesInRow.length > 0) {
+                const minCol = Math.min(...tilesInRow.map(t => t.col));
+                const maxCol = Math.max(...tilesInRow.map(t => t.col));
+
+                const playerLeft = playerIds.find(pid => {
+                    const pos = getGridPosition($("#" + pid));
+                    return pos.row === row && pos.col === minCol - 1;
                 });
-            });
-        
-            // 🧾 Display floating popup with ability names
-            showAbilityPopup($enemy, abilityNames);
 
-                    }
-        
-        function showAbilityPopup($target, abilityNames) {
-            const popup = $('<div class="ability-popup"></div>');
-            popup.html(abilityNames.map(name => `<div>${name}</div>`).join(""));
-            console.log("Popup abilityNames:", abilityNames);
+                const playerRight = playerIds.find(pid => {
+                    const pos = getGridPosition($("#" + pid));
+                    return pos.row === row && pos.col === maxCol + 1;
+                });
 
-            // Position popup above target
-            const offset = $target.offset();
-            popup.css({
-                position: "absolute",
-                top: offset.top - 50 + "px",
-                left: offset.left + "px",
-                zIndex: 9999
-            });
-        
-            $("body").append(popup);
-            
-            // Fade out and remove
-            setTimeout(() => {
-                popup.fadeOut(500, () => popup.remove());
-            }, 1500);
-
-
+                if (playerLeft && playerRight) {
+                    triggerPincerOn(enemyId, playerLeft, playerRight);
+                    return;
+                }
+            }
         }
-          
-        function flashBoardEffect(enemyId) {
-            const $enemy = $("#" + enemyId);
-            const flash = $('<div class="board-flash"></div>');
-        
-            const offset = $enemy.offset();
-            flash.css({
-                position: "absolute",
-                top: offset.top + "px",
-                left: offset.left + "px",
-                width: $enemy.width(),
-                height: $enemy.height(),
-                backgroundColor: "rgba(255, 0, 0, 0.4)",
-                borderRadius: "8px",
-                color: white,
-                zIndex: 9998
-            });
-        
-            $("body").append(flash);
-        
-            setTimeout(() => flash.fadeOut(300, () => flash.remove()), 400);
-        }
-         
-    
 
-$(function () {
+        // TOP-BOTTOM flank check for each column
+        for (let col = 0; col < 6; col++) {
+            const tilesInCol = occupiedTiles.filter(t => t.col === col);
+            if (tilesInCol.length > 0) {
+                const minRow = Math.min(...tilesInCol.map(t => t.row));
+                const maxRow = Math.max(...tilesInCol.map(t => t.row));
+
+                const playerTop = playerIds.find(pid => {
+                    const pos = getGridPosition($("#" + pid));
+                    return pos.col === col && pos.row === minRow - 1;
+                });
+
+                const playerBottom = playerIds.find(pid => {
+                    const pos = getGridPosition($("#" + pid));
+                    return pos.col === col && pos.row === maxRow + 1;
+                });
+
+                if (playerTop && playerBottom) {
+                    triggerPincerOn(enemyId, playerTop, playerBottom);
+                    return;
+                }
+            }
+        }
+    });
+}
+
+
+function triggerPincerOn(enemyId, playerA, playerB) {
+    const $enemy = $("#" + enemyId);
+    const $grid = $("#grid");
+
+    console.log(`🗡️ Pincer Attack on ${enemyId} between ${playerA} and ${playerB}!`);
+    $enemy.addClass("pincer-attack");
+    setTimeout(() => $enemy.removeClass("pincer-attack"), 1000);
+
+    const abilityNames = [];
+
+    [playerA, playerB].forEach(pid => {
+        const abilities = playerDataMap[pid]?.abilities || [];
+        if (abilities.length === 0) return;
+
+        const abilityName = abilities[0];
+        abilityNames.push(`${pid} → ${abilityName}`);
+
+        loadAbilityYAML(abilityName).then(ability => {
+            if (ability) {
+                abilityDataMap[abilityName] = ability;
+
+                // 🌀 Trigger ability logic
+                useAbility(pid, abilityName);
+
+                // ✨ Visual board effect
+                flashBoardEffect(enemyId);
+
+                // Optionally could show path/effect markers on grid
+            }
+        });
+    });
+
+    // 🧾 Display floating popup with ability names
+    showAbilityPopup($enemy, abilityNames);
+
+}
+
+function showAbilityPopup($target, abilityNames) {
+    const popup = $('<div class="ability-popup"></div>');
+    popup.html(abilityNames.map(name => `<div>${name}</div>`).join(""));
+    console.log("Popup abilityNames:", abilityNames);
+
+    // Position popup above target
+    const offset = $target.offset();
+    popup.css({
+        position: "absolute",
+        top: offset.top - 50 + "px",
+        left: offset.left + "px",
+        zIndex: 9999
+    });
+
+    $("body").append(popup);
+
+    // Fade out and remove
+    setTimeout(() => {
+        popup.fadeOut(500, () => popup.remove());
+    }, 1500);
+
+
+}
+
+function flashBoardEffect(enemyId) {
+    const $enemy = $("#" + enemyId);
+    const flash = $('<div class="board-flash"></div>');
+
+    const offset = $enemy.offset();
+    flash.css({
+        position: "absolute",
+        top: offset.top + "px",
+        left: offset.left + "px",
+        width: $enemy.width(),
+        height: $enemy.height(),
+        backgroundColor: "rgba(255, 0, 0, 0.4)",
+        borderRadius: "8px",
+        color: white,
+        zIndex: 9998
+    });
+
+    $("body").append(flash);
+
+    setTimeout(() => flash.fadeOut(300, () => flash.remove()), 400);
+}
+
+
+
+$(function() {
+    const modal = $("#pause-modal");
+
+    // Pause button handler
+    $("#pause-button").on("click", function() {
+        modal.show();
+        stopTimer();
+    });
+
+    // Resume button handler
+    $("#resume-button").on("click", function() {
+        modal.hide();
+        if (!turnEnded) {
+            startTimer();
+        }
+    });
+
+    // Return to menu handlers
+    $("#return-menu-button, #exit-button, #leave-battle-button").on("click", function() {
+        window.location.href = "/";
+    });
 
     function useAbility(playerId, abilityName) {
         const ability = abilityDataMap[abilityName];
         if (!ability) {
-                console.log(`❌ Ability "${abilityName}" not found.`);
+            console.log(`❌ Ability "${abilityName}" not found.`);
             return;
         }
 
@@ -273,56 +301,56 @@ $(function () {
         if (ability.type === "attack") {
             // Basic attack: target one adjacent enemy
             enemyIds.forEach(eid => {
-            const $enemy = $("#" + eid);
-            const pos = getGridPosition($enemy);
-            const attackerStats = getDynamicStats(playerId);
-            const baseDamage = ability.damage || 0;
-            const finalDamage = baseDamage + attackerStats.attack;
+                const $enemy = $("#" + eid);
+                const pos = getGridPosition($enemy);
+                const attackerStats = getDynamicStats(playerId);
+                const baseDamage = ability.damage || 0;
+                const finalDamage = baseDamage + attackerStats.attack;
 
-            if (isWithinRange(origin, pos, range)) {
-                applyDamage(eid, ability.damage + finalDamage || 0);
-                //     console.log(`🗡️ ${eid} hit for ${ability.damage + finalDamage} damage.`);
-            }
+                if (isWithinRange(origin, pos, range)) {
+                    applyDamage(eid, ability.damage + finalDamage || 0);
+                    //     console.log(`🗡️ ${eid} hit for ${ability.damage + finalDamage} damage.`);
+                }
             });
 
         } else if (ability.type === "area_attack") {
             // Hits all enemies within range
             enemyIds.forEach(eid => {
-            const $enemy = $("#" + eid);
-            const pos = getGridPosition($enemy);
-            if (isWithinRange(origin, pos, range)) {
-                applyDamage(eid, ability.damage || 0);
-                //     console.log(`💥 ${eid} hit for ${ability.damage} damage.`);
-            }
+                const $enemy = $("#" + eid);
+                const pos = getGridPosition($enemy);
+                if (isWithinRange(origin, pos, range)) {
+                    applyDamage(eid, ability.damage || 0);
+                    //     console.log(`💥 ${eid} hit for ${ability.damage} damage.`);
+                }
             });
 
         } else if (ability.type === "heal") {
-            // Heal self or adjacent ally
+            // Heal self or adjacent adjacent ally
             playerIds.forEach(pid => {
-            const $target = $("#" + pid);
-            const pos = getGridPosition($target);
-            if (isWithinRange(origin, pos, range)) {
-                applyHeal(pid, ability.heal || 0);
-                //     console.log(`💚 ${pid} healed for ${ability.heal}.`);
-            }
+                const $target = $("#" + pid);
+                const pos = getGridPosition($target);
+                if (isWithinRange(origin, pos, range)) {
+                    applyHeal(pid, ability.heal || 0);
+                    //     console.log(`💚 ${pid} healed for ${ability.heal}.`);
+                }
             });
 
         } else if (ability.type === "chain_heal") {
             // Heal in connected chain (e.g., adjacent players)
             const visited = new Set();
             function chainHeal(pid) {
-            if (visited.has(pid)) return;
-            visited.add(pid);
-            applyHeal(pid, ability.heal || 0);
-            //     console.log(`🔗 ${pid} chain-healed for ${ability.heal}.`);
+                if (visited.has(pid)) return;
+                visited.add(pid);
+                applyHeal(pid, ability.heal || 0);
+                //     console.log(`🔗 ${pid} chain-healed for ${ability.heal}.`);
 
-            const posA = getGridPosition($("#" + pid));
-            playerIds.forEach(otherPid => {
-                const posB = getGridPosition($("#" + otherPid));
-                if (!visited.has(otherPid) && isWithinRange(posA, posB, 1)) {
-                chainHeal(otherPid);
-                }
-            });
+                const posA = getGridPosition($("#" + pid));
+                playerIds.forEach(otherPid => {
+                    const posB = getGridPosition($("#" + otherPid));
+                    if (!visited.has(otherPid) && isWithinRange(posA, posB, 1)) {
+                        chainHeal(otherPid);
+                    }
+                });
             }
             chainHeal(playerId);
 
@@ -334,249 +362,250 @@ $(function () {
         }
     }
 
-  // 🔁 Next round handler
-  $("#next-round").on("click", function () {
-    unlockAllPlayers();
-  });
+    // 🔁 Next round handler
+    $("#next-round").on("click", function() {
+        unlockAllPlayers();
+    });
 });
 
 function loadLevelFromYAML(path) {
-    fetch(path)
+    return fetch(path)
         .then(res => res.text())
         .then(text => {
-        const data = jsyaml.load(text);
-        applyLevel(data);
+            const data = jsyaml.load(text);
+            applyLevel(data);
+            return data;
         })
         .catch(err => {
-        console.error("Failed to load YAML:", err);
-        //     console.log("Error loading level.yaml");
+            console.error("Failed to load YAML:", err);
+            return null;
+        });
+}
+
+function applyLevel(data) {
+    // Set background
+    if (data.background) {
+        $("#grid").css("background-image", `url(${data.background})`);
+    }
+    //   bg music
+    if (data.music) {
+        const audio = document.getElementById('bg-music');
+        audio.src = data.music;
+        audio.volume = 0.5; // adjust as needed
+        document.getElementById('playButton').addEventListener('click', () => {
+            audio.play().catch(err => console.error('Playback failed:', err));
         });
     }
 
-function applyLevel(data) {
-// Set background
-if (data.background) {
-$("#grid").css("background-image", `url(${data.background})`);
-}
-//   bg music
-if (data.music) {
-    const audio = document.getElementById('bg-music');
-    audio.src = data.music;
-    audio.volume = 0.5; // adjust as needed
-    document.getElementById('playButton').addEventListener('click', () => {
-        audio.play().catch(err => console.error('Playback failed:', err));
-    });
-}
-
-  for (const playerId in playerDataMap) {
-    let stats = getDynamicStats(playerId);
-    playerHP[playerId] = stats.hp;
-    $(`#hp_${playerId}`).text(`HP: ${playerHP[playerId]}`);
+    for (const playerId in playerDataMap) {
+        let stats = getDynamicStats(playerId);
+        playerHP[playerId] = stats.hp;
+        $(`#hp_${playerId}`).text(`HP: ${playerHP[playerId]}`);
     }
     // 🎯 Dynamically place players in row 7 (bottom), spread across columns
     const teamIds = Object.keys(playerDataMap);
     teamIds.forEach((playerId, index) => {
         const $el = $(`#${playerId}`);
         if ($el.length) {
-        const col = 1 + index; // start from col 1, or tweak as needed
-        setGridPosition($el, 7, col);
+            const col = 1 + index; // start from col 1, or tweak as needed
+            setGridPosition($el, 7, col);
         }
     });
 
     if (data.enemies) {
         renderEnemies(data.enemies);
     }
-// Register terrain
-if (data.terrain) {
-    data.terrain.forEach(t => {
-    const key = `${t.row},${t.col}`;
-    terrainMap[key] = {
-        type: t.type,
-        damage: t.damage
-    };
-    });
-}
-renderTerrain(); // 🔥 Render visuals for terrain
+    // Register terrain
+    if (data.terrain) {
+        data.terrain.forEach(t => {
+            const key = `${t.row},${t.col}`;
+            terrainMap[key] = {
+                type: t.type,
+                damage: t.damage
+            };
+        });
+    }
+    renderTerrain(); // 🔥 Render visuals for terrain
 }
 
 function getDynamicStats(playerId) {
-const player = playerDataMap[playerId];
-if (!player) return {};
+    const player = playerDataMap[playerId];
+    if (!player) return {};
 
-const char = characterDataMap[player.character];
-const level = player.level || 1;
-const statsRow = playerStatsByLevel[level] || {};
+    const char = characterDataMap[player.character];
+    const level = player.level || 1;
+    const statsRow = playerStatsByLevel[level] || {};
 
-const stats = {
-hp: (statsRow["Health Min"] || 100) * (char?.health_multiplier || 1),
-attack: (statsRow["Attack Min"] || 10) * (char?.attack_multiplier || 1),
-defense: (statsRow["Defense Min"] || 5) * (char?.defense_multiplier || 1)
-};
+    const stats = {
+        hp: (statsRow["Health Min"] || 100) * (char?.health_multiplier || 1),
+        attack: (statsRow["Attack Min"] || 10) * (char?.attack_multiplier || 1),
+        defense: (statsRow["Defense Min"] || 5) * (char?.defense_multiplier || 1)
+    };
 
-// Add equipment bonuses
-(player.equipment || []).forEach(item => {
-const eq = equipmentDataMap[item];
-if (eq) {
-  if (eq.attack) stats.attack += eq.attack;
-  if (eq.defense) stats.defense += eq.defense;
-  if (eq.hp) stats.hp += eq.hp;
-}
-});
+    // Add equipment bonuses
+    (player.equipment || []).forEach(item => {
+        const eq = equipmentDataMap[item];
+        if (eq) {
+            if (eq.attack) stats.attack += eq.attack;
+            if (eq.defense) stats.defense += eq.defense;
+            if (eq.hp) stats.hp += eq.hp;
+        }
+    });
 
-// Round for display
-stats.hp = Math.floor(stats.hp);
-stats.attack = Math.floor(stats.attack);
-stats.defense = Math.floor(stats.defense);
+    // Round for display
+    stats.hp = Math.floor(stats.hp);
+    stats.attack = Math.floor(stats.attack);
+    stats.defense = Math.floor(stats.defense);
 
-return stats;
+    return stats;
 }
 
 function loadTeamFromYAML(path) {
-return fetch(path)
-.then(res => res.text())
-.then(async text => {
-  const data = jsyaml.load(text);
-  const team = data.team;
+    return fetch(path)
+        .then(res => res.text())
+        .then(async text => {
+            const data = jsyaml.load(text);
+            const team = data.team;
 
-  if (!team || !Array.isArray(team)) {
-    console.error("❌ Invalid team.yaml structure. Expected `team: [ ... ]`.");
-    return;
-  }
+            if (!team || !Array.isArray(team)) {
+                console.error("❌ Invalid team.yaml structure. Expected `team: [ ... ]`.");
+                return;
+            }
 
-  const allAbilities = new Set();
-  const allEquipment = new Set();
-  const allCharacterIds = new Set();
+            const allAbilities = new Set();
+            const allEquipment = new Set();
+            const allCharacterIds = new Set();
 
-  // Store player data and collect references
-  team.forEach(member => {
-    playerDataMap[member.id] = member;
-    (member.equipment || []).forEach(eq => allEquipment.add(eq));
-    if (member.character) allCharacterIds.add(member.character);
-  });
+            // Store player data and collect references
+            team.forEach(member => {
+                playerDataMap[member.id] = member;
+                (member.equipment || []).forEach(eq => allEquipment.add(eq));
+                if (member.character) allCharacterIds.add(member.character);
+            });
 
-  // Load all characters
-  const characterPromises = Array.from(allCharacterIds).map(async charId => {
-    //     console.log("📥 Loading character:", charId);
-    await loadCharacterYAML(charId);
-    const char = characterDataMap[charId];
-    if (char?.abilities) {
-      char.abilities.forEach(ab => allAbilities.add(ab));
-    }
-  });
-  await Promise.all(characterPromises);
+            // Load all characters
+            const characterPromises = Array.from(allCharacterIds).map(async charId => {
+                //     console.log("📥 Loading character:", charId);
+                await loadCharacterYAML(charId);
+                const char = characterDataMap[charId];
+                if (char?.abilities) {
+                    char.abilities.forEach(ab => allAbilities.add(ab));
+                }
+            });
+            await Promise.all(characterPromises);
 
-  // Load all abilities
-  const abilityPromises = Array.from(allAbilities).map(async abName => {
-    const data = await loadAbilityYAML(abName);
-    if (data) {
-      abilityDataMap[abName] = data;
-      //     console.log(`✨ Loaded ability: ${abName}`);
-    }
-  });
-  await Promise.all(abilityPromises);
+            // Load all abilities
+            const abilityPromises = Array.from(allAbilities).map(async abName => {
+                const data = await loadAbilityYAML(abName);
+                if (data) {
+                    abilityDataMap[abName] = data;
+                    //     console.log(`✨ Loaded ability: ${abName}`);
+                }
+            });
+            await Promise.all(abilityPromises);
 
-  // Load all equipment
-  const equipmentPromises = Array.from(allEquipment).map(async eqName => {
-    const data = await loadEquipmentYAML(eqName);
-    if (data) {
-      equipmentDataMap[eqName] = data;
-      //     console.log(`🛡️ Loaded equipment: ${eqName}`);
-    }
-  });
-  await Promise.all(equipmentPromises);
+            // Load all equipment
+            const equipmentPromises = Array.from(allEquipment).map(async eqName => {
+                const data = await loadEquipmentYAML(eqName);
+                if (data) {
+                    equipmentDataMap[eqName] = data;
+                    //     console.log(`🛡️ Loaded equipment: ${eqName}`);
+                }
+            });
+            await Promise.all(equipmentPromises);
 
-  //     console.log("✅ Team and all dependencies fully loaded.");
-})
-.catch(err => console.error("❌ Failed to load team.yaml:", err));
+            //     console.log("✅ Team and all dependencies fully loaded.");
+        })
+        .catch(err => console.error("❌ Failed to load team.yaml:", err));
 }
 
 
 async function loadTeamYAML(path) {
-const res = await fetch(path);
-const text = await res.text();
-const data = jsyaml.load(text);
-teamData = data.team || [];
-const characterIds = new Set(teamData.map(p => p.character));
-for (const id of characterIds) {
-await loadCharacterYAML(id);
-}
-//     console.log("✅ Loaded team and characters.");
+    const res = await fetch(path);
+    const text = await res.text();
+    const data = jsyaml.load(text);
+    teamData = data.team || [];
+    const characterIds = new Set(teamData.map(p => p.character));
+    for (const id of characterIds) {
+        await loadCharacterYAML(id);
+    }
+    //     console.log("✅ Loaded team and characters.");
 }
 
 function loadAbilityYAML(abilityName) {
-return fetch(`/static/abilities/${abilityName}.yaml`)
-.then(res => res.text())
-.then(text => jsyaml.load(text))
-.catch(err => {
-  console.error(`Failed to load ability ${abilityName}:`, err);
-  return null;
-});
+    return fetch(`/static/abilities/${abilityName}.yaml`)
+        .then(res => res.text())
+        .then(text => jsyaml.load(text))
+        .catch(err => {
+            console.error(`Failed to load ability ${abilityName}:`, err);
+            return null;
+        });
 }
 
 function loadEquipmentYAML(name) {
-return fetch(`/static/equipment/${name}.yaml`)
-.then(res => res.text())
-.then(text => jsyaml.load(text))
-.catch(err => {
-  console.error(`Failed to load equipment: ${name}`, err);
-  return null;
-});
+    return fetch(`/static/equipment/${name}.yaml`)
+        .then(res => res.text())
+        .then(text => jsyaml.load(text))
+        .catch(err => {
+            console.error(`Failed to load equipment: ${name}`, err);
+            return null;
+        });
 }
 
 function getDynamicStats(playerId) {
-const player = playerDataMap[playerId];
-if (!player) return {};
-const level = player.level || 1;
-const levelStats = playerStatsByLevel[level] || {};
-let stats = {
-    hp: levelStats.base_hp || 100,
-    attack: levelStats.attack || 10,
-    defense: levelStats.defense || 0
-};
-// Add equipment bonuses
-(player.equipment || []).forEach(item => {
-const equip = equipmentDataMap[item];
-if (equip) {
-  if (equip.attack) stats.attack += equip.attack;
-  if (equip.defense) stats.defense += equip.defense;
-}
-});
-return stats;
+    const player = playerDataMap[playerId];
+    if (!player) return {};
+    const level = player.level || 1;
+    const levelStats = playerStatsByLevel[level] || {};
+    let stats = {
+        hp: levelStats.base_hp || 100,
+        attack: levelStats.attack || 10,
+        defense: levelStats.defense || 0
+    };
+    // Add equipment bonuses
+    (player.equipment || []).forEach(item => {
+        const equip = equipmentDataMap[item];
+        if (equip) {
+            if (equip.attack) stats.attack += equip.attack;
+            if (equip.defense) stats.defense += equip.defense;
+        }
+    });
+    return stats;
 }
 
 
 async function loadCharacterYAML(name) {
-try {
-const res = await fetch(`/static/characters/${name}.yaml`);
-const text = await res.text();
-const data = jsyaml.load(text);
-characterDataMap[name] = data;
-//     console.log(`✅ Loaded character: ${name}`);
-} catch (err) {
-console.error(`❌ Failed to load character: ${name}`, err);
-}
+    try {
+        const res = await fetch(`/static/characters/${name}.yaml`);
+        const text = await res.text();
+        const data = jsyaml.load(text);
+        characterDataMap[name] = data;
+        //     console.log(`✅ Loaded character: ${name}`);
+    } catch (err) {
+        console.error(`❌ Failed to load character: ${name}`, err);
+    }
 }
 
 function loadBaseStatsCSV(path) {
     return fetch(path)
-    .then(res => res.text())
-    .then(csv => {
-    const rows = csv.trim().split("\n");
-    const headers = rows[0].split(",");
-    for (let i = 1; i < rows.length; i++) {
-        const values = rows[i].split(",");
-        const level = parseInt(values[0]);
-        playerStatsByLevel[level] = {};
-        headers.forEach((header, index) => {
-        const key = header.trim();
-        const value = parseFloat(values[index]);
-        playerStatsByLevel[level][key] = isNaN(value) ? values[index] : value;
-        });
-    }
-    //     console.log("✅ Loaded base stats from CSV");
-    })
-    .catch(err => console.error("❌ Failed to load base_stats.csv", err));
-    }
+        .then(res => res.text())
+        .then(csv => {
+            const rows = csv.trim().split("\n");
+            const headers = rows[0].split(",");
+            for (let i = 1; i < rows.length; i++) {
+                const values = rows[i].split(",");
+                const level = parseInt(values[0]);
+                playerStatsByLevel[level] = {};
+                headers.forEach((header, index) => {
+                    const key = header.trim();
+                    const value = parseFloat(values[index]);
+                    playerStatsByLevel[level][key] = isNaN(value) ? values[index] : value;
+                });
+            }
+            //     console.log("✅ Loaded base stats from CSV");
+        })
+        .catch(err => console.error("❌ Failed to load base_stats.csv", err));
+}
 
 // function getGridPosition($el) {
 //     const offset = $el.position();
@@ -618,7 +647,7 @@ function lockPlayer($el) {
 
 
 function unlockAllPlayers() {
-    $(".draggable-unit").each(function () {
+    $(".draggable-unit").each(function() {
         $(this).draggable("enable");
         $(this).css("cursor", "grab");
     });
@@ -626,15 +655,15 @@ function unlockAllPlayers() {
     $("#next-round").hide();
     turnEnded = false;
     currentPlayer = null;
-    }
+}
 
 
 function isSamePosition(pos1, pos2) {
-return pos1.row === pos2.row && pos1.col === pos2.col;
+    return pos1.row === pos2.row && pos1.col === pos2.col;
 }
 
 function oppositeDirection(deltaRow, deltaCol) {
-return { row: -Math.sign(deltaRow), col: -Math.sign(deltaCol) };
+    return { row: -Math.sign(deltaRow), col: -Math.sign(deltaCol) };
 }
 
 function setGridPosition($el, row, col) {
@@ -642,8 +671,8 @@ function setGridPosition($el, row, col) {
     col = Math.max(0, Math.min(col, 5));
     //     console.log(`${$el.attr("id")} snapped to (${row}, ${col}) -> top: ${row * tileSize + 7}px`);
     $el.css({
-    top: row * tileSize + 7 + 'px',
-    left: col * tileSize + 7 + 'px'
+        top: row * tileSize + 7 + 'px',
+        left: col * tileSize + 7 + 'px'
     });
 }
 
@@ -765,8 +794,18 @@ function isTileOccupied(to, selfId = null) {
         const isBoss = $enemy.hasClass("boss-unit");
         const tiles = getOccupiedTiles($enemy, isBoss ? 2 : 1, isBoss ? 2 : 1);
 
-        if (tiles.some(tile => isSamePosition(tile, to))) {
-            return { type: isBoss ? "boss" : "enemy", id: eid };
+        // For boss units, check full 2x2 area
+        if (isBoss) {
+            const bossPos = {
+                row: parseInt($enemy.attr("data-row")),
+                col: parseInt($enemy.attr("data-col"))
+            };
+            if (to.row >= bossPos.row && to.row < bossPos.row + 2 &&
+                to.col >= bossPos.col && to.col < bossPos.col + 2) {
+                return { type: "boss", id: eid };
+            }
+        } else if (tiles.some(tile => isSamePosition(tile, to))) {
+            return { type: "enemy", id: eid };
         }
     }
 
@@ -794,108 +833,110 @@ function isTileOccupied(to, selfId = null) {
 
 function activateDraggables() {
 
-$(".draggable-unit").draggable({
-containment: "#grid",
-grid: [1, 1],
+    $(".draggable-unit").draggable({
+        containment: "#grid",
+        grid: [1, 1],
 
-start: function () {
-    recentTerrainHits.clear(); // 🧽 Allow terrain to damage again on a new drag
-    recentPushes.clear();
-    terrainVisitTracker.clear();
-    
-    if (playerIds.length === 0) {
-        playerIds = Object.keys(playerDataMap);
-        }
+        start: function() {
+            recentTerrainHits.clear(); // 🧽 Allow terrain to damage again on a new drag
+            recentPushes.clear();
+            terrainVisitTracker.clear();
 
-  const $this = $(this);
-  const id = $this.attr('id');
-  if (turnEnded || (currentPlayer && currentPlayer !== id)) return false;
-    currentPlayer = id;
-    activeDrag = $this;
-    startPositions[id] = getGridPosition($this);
-    prevDragTile[id] = startPositions[id];
-    lastLoggedTile[id] = startPositions[id];
-    startTimer();
-    },
+            if (playerIds.length === 0) {
+                playerIds = Object.keys(playerDataMap);
+            }
 
-    drag: function (event, ui) {
-        const $this = $(this);
-        const thisId = $this.attr("id");
-        const col = Math.floor(ui.position.left / tileSize);
-        const row = Math.floor(ui.position.top / tileSize);
-        const index = row * 6 + col;
-        
-    
-        $(".grid-item").removeClass("highlight");
-        $("#tile-" + index).addClass("highlight");
-    
-        const currentTile = { row, col };
-        const otherIds = playerIds.filter(pid => pid !== thisId);
-    
-        let lastTile = prevDragTile[thisId];
-        if (!lastTile) {
-            lastTile = getGridPosition($this);
-            prevDragTile[thisId] = lastTile;
-        }
-    
-        if (!lastLoggedTile[thisId]) {
-            lastLoggedTile[thisId] = currentTile;
-        }
+            const $this = $(this);
+            const id = $this.attr('id');
+            if (turnEnded || (currentPlayer && currentPlayer !== id)) return false;
+            currentPlayer = id;
+            activeDrag = $this;
+            startPositions[id] = getGridPosition($this);
+            prevDragTile[id] = startPositions[id];
+            lastLoggedTile[id] = startPositions[id];
+            startTimer();
+        },
 
-         // ✅ Check if moving to a blocked tile (boss, enemy, or player)
-         const conflict = isTileOccupied(currentTile, thisId);
-         if (!conflict) {
-             lastSafeTile[thisId] = currentTile;
-         }
-    
-        if (!isSamePosition(currentTile, lastLoggedTile[thisId])) {
-            //     console.log(`${thisId} moved to row ${row}, col ${col}`);
-            lastLoggedTile[thisId] = currentTile;
-        }
-    
-        // ✅ Reset push flags at the start of each new drag tick
-        recentPushes.clear();
-        // ✅ Push logic
-        otherIds.forEach(otherId => {
-            handlePlayerPush(thisId, otherId, lastTile, currentTile);
-        });
-    
-        if (conflict) {
-            // Revert drag position visually (no cancel — just move the piece back)
-            const $el = $(`#${thisId}`);
-            const safePos = prevDragTile[thisId];
-            setGridPosition($el, safePos.row, safePos.col);
-            // console.log(`⛔ ${thisId} can't move through ${conflict.type} (${conflict.id}) at (${currentTile.row}, ${currentTile.col})`);
-            return;
-        }
-    
-        // ✅ Now safe: update previous drag tile
-        prevDragTile[thisId] = currentTile;
-    
-        // ✅ Terrain damage for every tile passed
-        if (!isSamePosition(currentTile, lastTile)) {
-            const stepRow = Math.sign(currentTile.row - lastTile.row);
-            const stepCol = Math.sign(currentTile.col - lastTile.col);
-            let traversedRow = lastTile.row;
-            let traversedCol = lastTile.col;
-    
-            while (!(traversedRow === currentTile.row && traversedCol === currentTile.col)) {
-                traversedRow += stepRow;
-                traversedCol += stepCol;
-    
-                const key = `${traversedRow},${traversedCol}`;
-                const terrain = terrainMap[key];
-                if (terrain) {
-                    playerHP[thisId] -= terrain.damage;
-                    if (playerHP[thisId] < 0) playerHP[thisId] = 0;
+        drag: function(event, ui) {
+            const $this = $(this);
+            const thisId = $this.attr("id");
+            const col = Math.floor(ui.position.left / tileSize);
+            const row = Math.floor(ui.position.top / tileSize);
+            const index = row * 6 + col;
+
+
+            $(".grid-item").removeClass("highlight");
+            $("#tile-" + index).addClass("highlight");
+
+            const currentTile = { row, col };
+            const otherIds = playerIds.filter(pid => pid !== thisId);
+
+            let lastTile = prevDragTile[thisId];
+            if (!lastTile) {
+                lastTile = getGridPosition($this);
+                prevDragTile[thisId] = lastTile;
+            }
+
+            if (!lastLoggedTile[thisId]) {
+                lastLoggedTile[thisId] = currentTile;
+            }
+
+            // ✅ Check if moving to a blocked tile (boss, enemy, or player)
+            const conflict = isTileOccupied(currentTile, thisId);
+            if (!conflict) {
+                lastSafeTile[thisId] = currentTile;
+            }
+
+            if (!isSamePosition(currentTile, lastLoggedTile[thisId])) {
+                //     console.log(`${thisId} moved to row ${row}, col ${col}`);
+                lastLoggedTile[thisId] = currentTile;
+            }
+
+            // ✅ Reset push flags at the start of each new drag tick
+            recentPushes.clear();
+            // ✅ Push logic
+            otherIds.forEach(otherId => {
+                handlePlayerPush(thisId, otherId, lastTile, currentTile);
+            });
+
+            if (conflict) {
+                // Revert drag position visually (no cancel — just move the piece back)
+                const $el = $(`#${thisId}`);
+                const safePos = prevDragTile[thisId];
+                setGridPosition($el, safePos.row, safePos.col);
+                // console.log(`⛔ ${thisId} can't move through ${conflict.type} (${conflict.id}) at (${currentTile.row}, ${currentTile.col})`);
+                return;
+            }
+
+            // ✅ Now safe: update previous drag tile
+            prevDragTile[thisId] = currentTile;
+
+            // ✅ Terrain damage for every tile passed
+            if (!isSamePosition(currentTile, lastTile)) {
+                const stepRow = Math.sign(currentTile.row - lastTile.row);
+                const stepCol = Math.sign(currentTile.col - lastTile.col);
+                let traversedRow = lastTile.row;
+                let traversedCol = lastTile.col;
+
+                while (!(traversedRow === currentTile.row && traversedCol === currentTile.col)) {
+                    traversedRow += stepRow;
+                    traversedCol += stepCol;
+
+                    const key = `${traversedRow},${traversedCol}`;
+                    const terrain = terrainMap[key];
+                    if (terrain) {
+                        playerHP[thisId] -= terrain.damage;
+                        if (playerHP[thisId] < 0) {
+                            playerHP[thisId] = 0;
+                        }
                         $(`#hp_${thisId}`).text(`HP: ${playerHP[thisId]}`);
-                    //     console.log(`🔥 ${thisId} walked on ${terrain.type} at (${traversedRow}, ${traversedCol}), took ${terrain.damage} damage`);
+                        //     console.log(`🔥 ${thisId} walked on ${terrain.type} at (${traversedRow}, ${traversedCol}), took ${terrain.damage} damage`);
+                    }
                 }
             }
-        }
-    },
-    
-        stop: function () {
+        },
+
+        stop: function() {
             const $this = $(this);
             $(".grid-item").removeClass("highlight");
 
@@ -948,8 +989,8 @@ start: function () {
                 const stepY = from.row + Math.sign(dy) * i;
                 const sparkle = $('<div class="sparkle"></div>');
                 sparkle.css({
-                left: stepX * tileSize + 30 + "px",
-                top: stepY * tileSize + 30 + "px"
+                    left: stepX * tileSize + 30 + "px",
+                    top: stepY * tileSize + 30 + "px"
                 });
                 $("#grid").append(sparkle);
                 setTimeout(() => sparkle.remove(), 500);
@@ -961,65 +1002,65 @@ start: function () {
             $(".draggable-unit").draggable("disable");
             $("#next-round").show();
             checkPincerCombat();
-            }
+        }
 
 
-});
+    });
 }
 
 function renderPlayerDivs() {
-const container = $("#player-container");
-container.empty();
-//   //     console.log("📦 playerDataMap contents:", playerDataMap);
-Object.keys(playerDataMap).forEach(playerId => {
-const player = playerDataMap[playerId];
-const char = characterDataMap[player.character];
-const unitHTML = `
+    const container = $("#player-container");
+    container.empty();
+    //   //     console.log("📦 playerDataMap contents:", playerDataMap);
+    Object.keys(playerDataMap).forEach(playerId => {
+        const player = playerDataMap[playerId];
+        const char = characterDataMap[player.character];
+        const unitHTML = `
   <div id="${playerId}" class="draggable-unit">
-    <img id="img_${playerId}" class="unit-icon" src="${char?.img || ''}" alt="${char?.name || 'Player'}">
+    <img id="img_${playerId}" class="unit-icon" src="/static/assets/players/${playerId}.png" alt="${char?.name || 'Player'}">
     <div class="hp-label" id="hp_${playerId}">HP: 100</div>
   </div>
 `;
-container.append(unitHTML);
-const $el = $(`#${playerId}`);
-if ($el.length) {
-  setGridPosition($el, 7, 2); // TEMP default placement
-}
-});
+        container.append(unitHTML);
+        const $el = $(`#${playerId}`);
+        if ($el.length) {
+            setGridPosition($el, 7, 2); // TEMP default placement
+        }
+    });
 }
 
 function renderEnemies(enemyList) {
     const container = $("#enemy-container");
     enemyIds = [];
-  
+
     enemyList.forEach(enemy => {
-      const { id, img, hp = 100 } = enemy;
-      enemyIds.push(id);
-  
-      const unitHTML = `
+        const { id, img, hp = 100 } = enemy;
+        enemyIds.push(id);
+
+        const unitHTML = `
         <div id="${id}" class="enemy-unit">
           <img src="${img}" alt="${id}" class="unit-icon">
           <div class="hp-label" id="hp_${id}">HP: ${hp}</div>
         </div>
       `;
-      container.append(unitHTML);
-      setGridPosition($(`#${id}`), enemy.row, enemy.col);
+        container.append(unitHTML);
+        setGridPosition($(`#${id}`), enemy.row, enemy.col);
     });
-  }
-  
+}
+
 function renderTerrain() {
     Object.keys(terrainMap).forEach(key => {
-    const [row, col] = key.split(',').map(Number);
-    const tileIndex = row * 6 + col;
-    const $tile = $(`#tile-${tileIndex}`);
-    const terrain = terrainMap[key];
+        const [row, col] = key.split(',').map(Number);
+        const tileIndex = row * 6 + col;
+        const $tile = $(`#tile-${tileIndex}`);
+        const terrain = terrainMap[key];
 
-    const terrainImg = $('<img>')
-    .addClass('terrain-icon')
-    .attr('src', `/static/assets/terrain/${terrain.type}.png`)
-    .attr('alt', terrain.type);
+        const terrainImg = $('<img>')
+            .addClass('terrain-icon')
+            .attr('src', `/static/assets/terrain/${terrain.type}.png`)
+            .attr('alt', terrain.type);
 
-    $tile.append(terrainImg);
+        $tile.append(terrainImg);
     });
 }
 
@@ -1044,8 +1085,15 @@ async function initGame() {
     //     console.log(`📦 Loading level: ${levelPath}`);
     loadLevelFromYAML(levelPath); // 🧠 Positions + terrain
 
-    // 🧠 Load boss
-    await loadBossYAML('/static/assets/bosses/test_boss.yaml');
-
+    // Load level and handle boss data
+    loadLevelFromYAML(levelPath)
+        .then(levelData => {
+            if (levelData && levelData.bosses && levelData.bosses.length > 0) {
+                for (const boss of levelData.bosses) {
+                    loadBossYAML('/static/assets/bosses/test_boss.yaml');
+                }
+            }
+        })
+        .catch(err => console.error("Failed to load level:", err));
 }
 initGame(); // Call it

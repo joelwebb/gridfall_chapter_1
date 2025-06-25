@@ -1,34 +1,8 @@
-
 {% extends "layout.html" %}
 
+{% block title %}Save Game{% endblock %}
+
 {% block content %}
-<div class="pcoded-main-container">
-    <div class="pcoded-content">
-        <div class="row">
-            <div class="col-md-6 mx-auto">
-                <div class="card">
-                    <div class="card-header">
-                        <h5>Login</h5>
-                    </div>
-                    <div class="card-body">
-                        <form method="POST" action="/login">
-                            <div class="form-group mb-3">
-                                <label for="username">Username</label>
-                                <input type="text" class="form-control" id="username" name="username" value="demo" required>
-                            </div>
-                            <div class="form-group mb-3">
-                                <label for="password">Password</label>
-                                <input type="password" class="form-control" id="password" name="password" value="Pa$$w@rd123*9!" required>
-                            </div>
-                            <div class="d-flex gap-2">
-                                <button type="submit" class="btn btn-primary">Login</button>
-                                <a href="/new_play_game?level=level_1" class="btn btn-secondary">Mobile</a>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock content %}
+  <h2>Welcome to My Website!</h2>
+  <p>This is the Save Game page.</p>
+{% endblock %}
