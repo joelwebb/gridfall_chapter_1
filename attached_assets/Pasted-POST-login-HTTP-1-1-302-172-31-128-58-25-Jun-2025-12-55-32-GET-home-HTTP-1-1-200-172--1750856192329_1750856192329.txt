@@ -1,0 +1,27 @@
+POST /login HTTP/1.1" 302 -
+172.31.128.58 - - [25/Jun/2025 12:55:32] "GET /home HTTP/1.1" 200 -
+172.31.128.58 - - [25/Jun/2025 12:55:32] "GET /static/assets/css/style.css HTTP/1.1" 404 -
+172.31.128.58 - - [25/Jun/2025 12:55:32] "GET /static/js/product_tours/tutorial_tour.js HTTP/1.1" 404 -
+172.31.128.58 - - [25/Jun/2025 12:55:32] "GET /static/gridfall_static/assets/logo2.png HTTP/1.1" 404 -
+172.31.128.58 - - [25/Jun/2025 12:55:32] "GET /static/assets/js/plugins/popper.min.js HTTP/1.1" 404 -
+172.31.128.58 - - [25/Jun/2025 12:55:32] "GET /static/assets/js/plugins/perfect-scrollbar.min.js HTTP/1.1" 404 -
+172.31.128.58 - - [25/Jun/2025 12:55:32] "GET /static/assets/js/plugins/bootstrap.min.js HTTP/1.1" 404 -
+172.31.128.58 - - [25/Jun/2025 12:55:32] "GET /static/assets/js/pcoded.js HTTP/1.1" 404 -
+172.31.128.58 - - [25/Jun/2025 12:55:36] "GET /create_new_game HTTP/1.1" 302 -
+172.31.128.58 - - [25/Jun/2025 12:55:36] "GET /saved_game?game_id=1b657e9e-a935-4c87-85ce-23cabe33b07a&username=demo HTTP/1.1" 200 -
+172.31.128.58 - - [25/Jun/2025 12:55:36] "GET /static/js/product_tours/tutorial_tour.js HTTP/1.1" 404 -
+172.31.128.58 - - [25/Jun/2025 12:55:36] "GET /static/assets/js/plugins/popper.min.js HTTP/1.1" 404 -
+172.31.128.58 - - [25/Jun/2025 12:55:36] "GET /static/gridfall_static/assets/logo2.png HTTP/1.1" 404 -
+172.31.128.58 - - [25/Jun/2025 12:55:36] "GET /static/assets/css/style.css HTTP/1.1" 404 -
+172.31.128.58 - - [25/Jun/2025 12:55:36] "GET /static/assets/js/plugins/perfect-scrollbar.min.js HTTP/1.1" 404 -
+172.31.128.58 - - [25/Jun/2025 12:55:36] "GET /static/assets/js/plugins/bootstrap.min.js HTTP/1.1" 404 -
+172.31.128.58 - - [25/Jun/2025 12:55:36] "GET /static/assets/js/pcoded.js HTTP/1.1" 404 -
+172.31.128.58 - - [25/Jun/2025 12:55:36] "GET /static/gridfall_static/assets/maps/countryside.png HTTP/1.1" 404 -
+172.31.128.58 - - [25/Jun/2025 12:55:37] "GET /abilities HTTP/1.1" 200 -
+172.31.128.58 - - [25/Jun/2025 12:55:37] "GET /static/assets/css/style.css HTTP/1.1" 404 -
+172.31.128.58 - - [25/Jun/2025 12:55:37] "GET /static/assets/js/plugins/popper.min.js HTTP/1.1" 404 -
+172.31.128.58 - - [25/Jun/2025 12:55:37] "GET /static/js/product_tours/tutorial_tour.js HTTP/1.1" 404 -
+172.31.128.58 - - [25/Jun/2025 12:55:37] "GET /static/gridfall_static/assets/logo2.png HTTP/1.1" 404 -
+172.31.128.58 - - [25/Jun/2025 12:55:37] "GET /static/assets/js/plugins/bootstrap.min.js HTTP/1.1" 404 -
+172.31.128.58 - - [25/Jun/2025 12:55:37] "GET /static/assets/js/plugins/perfect-scrollbar.min.js HTTP/1.1" 404 -
+172.31.128.58 - - [25/Jun/2025 12:55:37] "GET /static/assets/js/pcoded.js HTTP/1.1" 404 -
