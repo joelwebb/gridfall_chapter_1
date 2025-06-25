@@ -1,22 +1,28 @@
-
 team:
-  - id: arin
+  - id: player_one
     character: arin
-    level: 1
+    experience: 100
     equipment:
       - sword
       - shield
 
-  - id: ru
-    character: ru  
-    level: 1
+  - id: player_two
+    character: ru
+    experience: 300
     equipment:
-      - lucent_sceptre
-      - ring_of_life
-
-  - id: dante
-    character: dante
-    level: 1
-    equipment:
+      - helmet
       - ember_pendant
-      - breastplate
+
+  - id: player_three
+    character: kean
+    experience: 300
+    equipment:
+      - ring_of_life
+      - lucent_sceptre
+
+  - id: player_four
+    character: dante
+    experience: 300
+    equipment:
+      - ring_of_life
+      - lucent_sceptre
