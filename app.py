@@ -14,7 +14,7 @@ def login():
         password = request.form.get('password')
         if username == "demo" and password == "Pa$$w@rd123*9!":
             session['username'] = username
-            return redirect('/home')
+            return redirect('/dashboard')
     return render_template('login.html')
 
 
@@ -23,6 +23,15 @@ def home():
     if 'username' not in session:
         return redirect('/login')
     return render_template('home.html', username=session['username'])
+
+
+@app.route('/dashboard')
+def dashboard():
+    if 'username' not in session:
+        return redirect('/login')
+    return render_template('dashboard.html', 
+                         username=session['username'],
+                         active_page='dashboard')
 
 
 @app.route('/create_new_game')
