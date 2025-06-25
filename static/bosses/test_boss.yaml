@@ -1,6 +1,6 @@
 id: boss_one
 name: Infernal Demon
-img: /static/assets/bosses/images/infernal_demon.png
+img: /static/bosses/images/infernal_demon.png
 row: 2
 col: 2
 hp: 1000

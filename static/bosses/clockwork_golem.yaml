@@ -1,6 +1,6 @@
 id: boss_one
 name: Clockwork Golem
-img: /static/assets/bosses/images/clockwork_golem.png
+img: /static/bosses/images/clockwork_golem.png
 row: 2
 col: 2
 hp: 10000
