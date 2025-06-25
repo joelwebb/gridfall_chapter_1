@@ -11,3 +11,19 @@ run = ["sh", "-c", "python app.py"]
 [[ports]]
 localPort = 5000
 externalPort = 80
+
+[workflows]
+runButton = "Start App"
+
+[[workflows.workflow]]
+name = "Start App"
+author = 42701900
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "pkill -f \"python app.py\" || true"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python app.py"

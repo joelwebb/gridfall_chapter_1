@@ -201,14 +201,27 @@ def shop():
 
 
 
+@app.route('/profile')
 def profile():
-    """Render the game shop page.
+    """Render the game profile page.
 
     Returns:
-        str: Rendered HTML template for game shop.
+        str: Rendered HTML template for game profile.
     """
     return render_template("profile.html",
                            active_page='profile',
+                           request=request)
+
+
+@app.route('/subscription')
+def subscription():
+    """Render the subscription page.
+
+    Returns:
+        str: Rendered HTML template for subscription.
+    """
+    return render_template("shop.html",
+                           active_page='subscription',
                            request=request)
 
 
