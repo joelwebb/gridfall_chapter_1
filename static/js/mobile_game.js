@@ -23,131 +23,131 @@ let turnEnded = false;
 let lastLoggedTile = {};
 
 function initializeMobileControls() {
-  // Wait for DOM to be ready
-  $(document).ready(function() {
-    const grid = document.querySelector('#grid');
-    
-    if (!grid) {
-      console.warn('Grid not found, retrying in 100ms');
-      setTimeout(initializeMobileControls, 100);
-      return;
-    }
+    // Wait for DOM to be ready
+    $(document).ready(function() {
+        const grid = document.querySelector('#grid');
 
-    function updateGridOffset() {
-      const rect = grid.getBoundingClientRect();
-      gridOffset = {
-        x: rect.left,
-        y: rect.top
-      };
-    }
+        if (!grid) {
+            console.warn('Grid not found, retrying in 100ms');
+            setTimeout(initializeMobileControls, 100);
+            return;
+        }
 
-    updateGridOffset();
-    window.addEventListener('resize', updateGridOffset);
+        function updateGridOffset() {
+            const rect = grid.getBoundingClientRect();
+            gridOffset = {
+                x: rect.left,
+                y: rect.top
+            };
+        }
 
-    // Attach touch events to the grid container
-    grid.addEventListener('touchstart', function(e) {
-      const unit = e.target.closest('.draggable-unit');
-      if (unit) {
-        console.log('Touch start on unit:', unit.id);
-        handleTouchStart(e);
-      }
-    }, { passive: false });
+        updateGridOffset();
+        window.addEventListener('resize', updateGridOffset);
 
-    grid.addEventListener('touchmove', function(e) {
-      if (activeDrag) {
-        handleTouchMove(e);
-      }
-    }, { passive: false });
+        // Attach touch events to the grid container
+        grid.addEventListener('touchstart', function(e) {
+            const unit = e.target.closest('.draggable-unit');
+            if (unit) {
+                console.log('Touch start on unit:', unit.id);
+                handleTouchStart(e);
+            }
+        }, { passive: false });
 
-    grid.addEventListener('touchend', function(e) {
-      if (activeDrag) {
-        handleTouchEnd(e);
-      }
-    }, { passive: false });
+        grid.addEventListener('touchmove', function(e) {
+            if (activeDrag) {
+                handleTouchMove(e);
+            }
+        }, { passive: false });
 
-    grid.addEventListener('touchcancel', function(e) {
-      if (activeDrag) {
-        handleTouchEnd(e);
-      }
-    }, { passive: false });
-  });
+        grid.addEventListener('touchend', function(e) {
+            if (activeDrag) {
+                handleTouchEnd(e);
+            }
+        }, { passive: false });
+
+        grid.addEventListener('touchcancel', function(e) {
+            if (activeDrag) {
+                handleTouchEnd(e);
+            }
+        }, { passive: false });
+    });
 }
 
 function handleTouchStart(e) {
-  console.log('🔵 Touch Start Event:', e);
-  if (turnEnded) return;
-  e.preventDefault();
+    console.log('🔵 Touch Start Event:', e);
+    if (turnEnded) return;
+    e.preventDefault();
 
-  const touch = e.touches[0];
-  const unit = e.target.closest('.draggable-unit');
-  console.log('🎯 Touch target:', unit?.id || 'no unit found');
-  if (!unit) return;
+    const touch = e.touches[0];
+    const unit = e.target.closest('.draggable-unit');
+    console.log('🎯 Touch target:', unit?.id || 'no unit found');
+    if (!unit) return;
 
-  activeDrag = $(unit);
-  currentPlayer = unit.id;
-  touchStartPos = { x: touch.clientX, y: touch.clientY };
+    activeDrag = $(unit);
+    currentPlayer = unit.id;
+    touchStartPos = { x: touch.clientX, y: touch.clientY };
 
-  const pos = getGridPosition(activeDrag);
-  startPositions[currentPlayer] = pos;
-  prevDragTile[currentPlayer] = pos;
-  lastLoggedTile[currentPlayer] = pos;
+    const pos = getGridPosition(activeDrag);
+    startPositions[currentPlayer] = pos;
+    prevDragTile[currentPlayer] = pos;
+    lastLoggedTile[currentPlayer] = pos;
 
-  startTimer();
+    startTimer();
 }
 
 function handleTouchMove(e) {
-  if (!activeDrag || turnEnded) return;
-  e.preventDefault();
+    if (!activeDrag || turnEnded) return;
+    e.preventDefault();
 
-  const touch = e.touches[0];
-  console.log('🔄 Touch Move Event:', {
-    clientX: touch.clientX,
-    clientY: touch.clientY,
-    activeDrag: activeDrag?.attr('id')
-  });
-  
-  const x = touch.clientX - gridOffset.x;
-  const y = touch.clientY - gridOffset.y;
+    const touch = e.touches[0];
+    console.log('🔄 Touch Move Event:', {
+        clientX: touch.clientX,
+        clientY: touch.clientY,
+        activeDrag: activeDrag?.attr('id')
+    });
 
-  const col = Math.floor(x / tileSize);
-  const row = Math.floor(y / tileSize);
+    const x = touch.clientX - gridOffset.x;
+    const y = touch.clientY - gridOffset.y;
 
-  if (row >= 0 && row < 8 && col >= 0 && col < 6) {
-    const newPos = { row, col };
-    const currentPos = getGridPosition(activeDrag);
+    const col = Math.floor(x / tileSize);
+    const row = Math.floor(y / tileSize);
 
-    if (!isSamePosition(newPos, currentPos)) {
-      setGridPosition(activeDrag, row, col);
-      prevDragTile[currentPlayer] = currentPos;
+    if (row >= 0 && row < 8 && col >= 0 && col < 6) {
+        const newPos = { row, col };
+        const currentPos = getGridPosition(activeDrag);
 
-      // Check for collisions
-      const conflict = isTileOccupied(newPos, currentPlayer);
-      if (!conflict) {
-        lastSafeTile[currentPlayer] = newPos;
-      }
+        if (!isSamePosition(newPos, currentPos)) {
+            setGridPosition(activeDrag, row, col);
+            prevDragTile[currentPlayer] = currentPos;
+
+            // Check for collisions
+            const conflict = isTileOccupied(newPos, currentPlayer);
+            if (!conflict) {
+                lastSafeTile[currentPlayer] = newPos;
+            }
+        }
     }
-  }
 }
 
 function handleTouchEnd(e) {
-  console.log('🔴 Touch End Event:', e);
-  if (!activeDrag) return;
-  e.preventDefault();
+    console.log('🔴 Touch End Event:', e);
+    if (!activeDrag) return;
+    e.preventDefault();
 
-  const pos = getGridPosition(activeDrag);
-  console.log('📍 Final position:', pos);
-  const conflict = isTileOccupied(pos, currentPlayer);
+    const pos = getGridPosition(activeDrag);
+    console.log('📍 Final position:', pos);
+    const conflict = isTileOccupied(pos, currentPlayer);
 
-  if (conflict) {
-    const fallback = lastSafeTile[currentPlayer] || prevDragTile[currentPlayer];
-    setGridPosition(activeDrag, fallback.row, fallback.col);
-  }
+    if (conflict) {
+        const fallback = lastSafeTile[currentPlayer] || prevDragTile[currentPlayer];
+        setGridPosition(activeDrag, fallback.row, fallback.col);
+    }
 
-  stopTimer();
-  activeDrag = null;
-  turnEnded = true;
-  $("#next-round").show();
-  checkPincerCombat();
+    stopTimer();
+    activeDrag = null;
+    turnEnded = true;
+    $("#next-round").show();
+    checkPincerCombat();
 }
 
 // Core utility functions
@@ -259,12 +259,12 @@ function checkPincerCombat() {
 
 // Initialize game
 async function initGame() {
-    await loadBaseStatsCSV('/static/gridfall_static/data/base_stats.csv');
-    await loadTeamFromYAML('/static/gridfall_static/data/team.yaml');
+    await loadBaseStatsCSV('/static/data/base_stats.csv');
+    await loadTeamFromYAML('/static/data/team.yaml');
     renderPlayerDivs();
 
     const levelName = getQueryParam("level") || "level_1";
-    const levelPath = `/static/gridfall_static/levels/${levelName}.yaml`;
+    const levelPath = `/static/levels/${levelName}.yaml`;
     await loadLevelFromYAML(levelPath);
 
     // Initialize mobile controls after elements are rendered
@@ -278,6 +278,6 @@ async function initGame() {
 
 // Initialize
 $(function() {
-  initGame();
-  setTimeout(initializeMobileControls, 100);
+    initGame();
+    setTimeout(initializeMobileControls, 100);
 });

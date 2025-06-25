@@ -1017,7 +1017,7 @@ function renderPlayerDivs() {
         const char = characterDataMap[player.character];
         const unitHTML = `
   <div id="${playerId}" class="draggable-unit">
-    <img id="img_${playerId}" class="unit-icon" src="/static/assets/players/${playerId}.png" alt="${char?.name || 'Player'}">
+    <img id="img_${playerId}" class="unit-icon" src="/static/players/${playerId}.png" alt="${char?.name || 'Player'}">
     <div class="hp-label" id="hp_${playerId}">HP: 100</div>
   </div>
 `;
@@ -1057,7 +1057,7 @@ function renderTerrain() {
 
         const terrainImg = $('<img>')
             .addClass('terrain-icon')
-            .attr('src', `/static/assets/terrain/${terrain.type}.png`)
+            .attr('src', `/static/terrain/${terrain.type}.png`)
             .attr('alt', terrain.type);
 
         $tile.append(terrainImg);
@@ -1090,7 +1090,7 @@ async function initGame() {
         .then(levelData => {
             if (levelData && levelData.bosses && levelData.bosses.length > 0) {
                 for (const boss of levelData.bosses) {
-                    loadBossYAML('/static/assets/bosses/test_boss.yaml');
+                    loadBossYAML('/static/bosses/test_boss.yaml');
                 }
             }
         })

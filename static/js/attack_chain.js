@@ -1,4 +1,4 @@
-// /static/assets/js/attack_chain.js
+// /static/js/attack_chain.js
 
 function runAttackChain(centerPlayerA, centerPlayerB, enemyId, playerDataMap, playerIds, isTileBlocked, getGridPosition, useAbility) {
     const chained = new Set([centerPlayerA, centerPlayerB]); // Initial pincer pair
