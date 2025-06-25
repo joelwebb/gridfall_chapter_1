@@ -1,3 +1,4 @@
+
 <ul class="nav pcoded-inner-navbar">
     <li class="nav-item pcoded-menu-caption" style="text-transform: capitalize;">
         <label>Game Options</label>
@@ -7,28 +8,28 @@
                 class="pcoded-mtext">Team</span></a>
     </li>
     <li class="nav-item">
-        <a href="{{ url_for('lore') }}" class="nav-link"><span class="pcoded-micon"><i class="feather icon-book"></i></span><span
-                class="pcoded-mtext">Lore</span></a>
-    </li>
-    <li class="nav-item">
         <a href="{{ url_for('equipment') }}" class="nav-link"><span class="pcoded-micon"><i class="feather icon-shield"></i></span><span
                 class="pcoded-mtext">Equipment</span></a>
     </li>
     <li class="nav-item">
-        <a href="{{ url_for('abilities') }}" class="nav-link"><span class="pcoded-micon"><i class="feather icon-zap"></i></span><span
-                class="pcoded-mtext">Abilities</span></a>
-    </li>
-    <li class="nav-item">
-        <a href="{{ url_for('saved_game') }}" class="nav-link"><span class="pcoded-micon"><i class="feather icon-home"></i></span><span
-                class="pcoded-mtext">Home</span></a>
+        <a href="{{ url_for('lore') }}" class="nav-link"><span class="pcoded-micon"><i class="feather icon-book"></i></span><span
+                class="pcoded-mtext">Lore</span></a>
     </li>
     <li class="nav-item">
         <a href="{{ url_for('settings') }}" class="nav-link"><span class="pcoded-micon"><i class="feather icon-settings"></i></span><span
                 class="pcoded-mtext">Settings</span></a>
     </li>
     <li class="nav-item">
-        <a href="/shop" class="nav-link"><span class="pcoded-micon"><i class="feather icon-shopping-cart"></i></span><span
-            class="pcoded-mtext">Shop</span></a>
+        <a href="{{ url_for('shop') }}" class="nav-link"><span class="pcoded-micon"><i class="feather icon-shopping-cart"></i></span><span
+                class="pcoded-mtext">Shop</span></a>
+    </li>
+    <li class="nav-item">
+        <a href="{{ url_for('play_game') }}" class="nav-link"><span class="pcoded-micon"><i class="feather icon-zap"></i></span><span
+                class="pcoded-mtext">Battle</span></a>
+    </li>
+    <li class="nav-item">
+        <a href="{{ url_for('saved_game') }}" class="nav-link"><span class="pcoded-micon"><i class="feather icon-home"></i></span><span
+                class="pcoded-mtext">Home</span></a>
     </li>
     <li class="nav-item">
         <a href="#" onclick="startTutorialTour(); return false;" class="nav-link">
