@@ -17,11 +17,13 @@ def login():
             return redirect('/home')
     return render_template('login.html')
 
+
 @app.route('/home')
 def home():
     if 'username' not in session:
         return redirect('/login')
     return render_template('home.html', username=session['username'])
+
 
 @app.route('/create_new_game')
 def create_new_game():
@@ -30,7 +32,9 @@ def create_new_game():
     # Generate a unique game ID
     game_id = str(uuid.uuid4())
     # Here you would typically save the game state
-    return redirect(url_for('saved_game', game_id=game_id, username=session['username']))
+    return redirect(
+        url_for('saved_game', game_id=game_id, username=session['username']))
+
 
 @app.route('/saved_game')
 def saved_game() -> str:
@@ -41,16 +45,23 @@ def saved_game() -> str:
     """
     return render_template('saved_game.html')
 
+
 @app.route('/select_saved_game')
 def select_saved_game():
     if 'username' not in session:
         return redirect('/login')
     # Mock data - replace with actual database query
-    saved_games = [
-        {'id': 'abc123', 'date': '2025-05-14', 'level': 1},
-        {'id': 'def456', 'date': '2025-05-13', 'level': 3}
-    ]
+    saved_games = [{
+        'id': 'abc123',
+        'date': '2025-05-14',
+        'level': 1
+    }, {
+        'id': 'def456',
+        'date': '2025-05-13',
+        'level': 3
+    }]
     return render_template('select_saved_game.html', saved_games=saved_games)
+
 
 @app.route('/')
 def index():
@@ -88,10 +99,12 @@ def play_game():
     level = request.args.get('level', None)
     return render_template('play_game.html', level=level)
 
+
 @app.route('/new_play_game')
 def new_play_game():
     level = request.args.get('level', 'level_1')
     return render_template('new_play_game.html', level=level)
+
 
 @app.route('/mobile_game')
 def mobile_game():
@@ -102,16 +115,21 @@ def mobile_game():
 @app.route('/team')
 def team():
     characters = []  # Assuming characters is defined somewhere or can be empty
-    return render_template('team.html', characters=characters, active_page='Team', request=request)
+    return render_template('team.html',
+                           characters=characters,
+                           active_page='Team',
+                           request=request)
+
 
 @app.route('/lore')
-def lore() -> str:
+def lore():
     """Render the game lore and story page.
 
     Returns:
         str: Rendered HTML template for game lore.
     """
     return render_template("lore.html", active_page='Lore', request=request)
+
 
 @app.route('/equipment')
 def equipment() -> str:
@@ -120,36 +138,46 @@ def equipment() -> str:
     Returns:
         str: Rendered HTML template for equipment management.
     """
-    return render_template("equipment.html",  active_page='Equipment', request=request)
+    return render_template("equipment.html",
+                           active_page='Equipment',
+                           request=request)
+
 
 @app.route('/abilities')
-def abilities() -> str:
+def abilities():
     """Render the character abilities page.
 
     Returns:
         str: Rendered HTML template for abilities management.
     """
-    return render_template("abilities.html", active_page='Abilities', request=request)
-
+    return render_template("abilities.html",
+                           active_page='Abilities',
+                           request=request)
 
 
 @app.route('/settings')
-def settings() -> str:
+def settings():
     """Render the game settings page.
 
     Returns:
         str: Rendered HTML template for game settings.
     """
-    return render_template("settings.html", active_page='Settings', request=request)
+    return render_template("settings.html",
+                           active_page='Settings',
+                           request=request)
+
 
 @app.route('/tutorial')
-def tutorial() -> str:
+def tutorial():
     """Render the game tutorial page.
 
     Returns:
         str: Rendered HTML template for game tutorial.
     """
-    return render_template("tutorial.html", active_page='Tutorial', request=request)
+    return render_template("tutorial.html",
+                           active_page='Tutorial',
+                           request=request)
+
 
 @app.route('/logout')
 def logout():
@@ -161,22 +189,28 @@ def logout():
     session.clear()
     return redirect(url_for('login'))
 
+
 @app.route('/shop')
-def shop() -> str:
+def shop():
     """Render the shop page.
 
     Returns:
         str: Rendered HTML template for shop.
     """
     return render_template("shop.html", active_page='Shop', request=request)
-    
-def shop() -> str:
+
+
+
+def profile():
     """Render the game shop page.
 
     Returns:
         str: Rendered HTML template for game shop.
     """
-    return render_template("shop.html", active_page='Shop', request=request)
+    return render_template("profile.html",
+                           active_page='profile',
+                           request=request)
+
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=5000, debug=True)

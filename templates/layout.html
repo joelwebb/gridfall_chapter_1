@@ -3,141 +3,136 @@
 
 <head>
 
-  <title>
-    Gridfall Chronicles
-  </title>
+	<title>
+		Gridfall C
+	</title>
 
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <meta name="description" content="" />
-  <meta name="keywords" content="">
-  <meta name="author" content="Vitality" />
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<meta name="description" content="" />
+	<meta name="keywords" content="">
+	<meta name="author" content="Vitality" />
 
-  <!-- Favicon icon -->
-  <link rel="icon" href="/static/images/favicon.ico" type="image/x-icon">
+	<!-- Favicon icon -->
+	<link rel="icon" href="/static/assets/images/favicon.ico" type="image/x-icon">
 
-  <!-- vendor css -->
-  <link rel="stylesheet" href="/static/css/style.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/shepherd.js@10.0.1/dist/css/shepherd.css" />
-  <script src="https://cdn.jsdelivr.net/npm/shepherd.js@10.0.1/dist/js/shepherd.min.js"></script>
-  <script src="/static/js/product_tours/tutorial_tour.js"></script>
+	<!-- vendor css -->
+	<link rel="stylesheet" href="/static/assets/css/style.css">
 
-  <!-- Specific Page CSS goes HERE  -->
-  {% block stylesheets %}{% endblock stylesheets %}
+	<!-- Specific Page CSS goes HERE  -->
+	{% block stylesheets %}{% endblock stylesheets %}
 
 
-  <style>
-    .pcoded-navbar .pcoded-inner-navbar li a:hover {
-      color: rgba(255, 255, 255, 1);
-      box-shadow: 0 5px 15px rgba(145, 92, 182, .4);
+	<style>
+		.pcoded-navbar .pcoded-inner-navbar li a:hover {
+			color: rgba(255, 255, 255, 1);
+			box-shadow: 0 5px 15px rgba(145, 92, 182, .4);
 
-    }
-  </style>
+		}
+	</style>
 </head>
 
 <body class="">
 
 
 
-  <!-- start sidebar -->
-  {% if request.endpoint != 'login' %}
-  <nav class="pcoded-navbar menupos-fixed menu-light ">
-    <div class="navbar-wrapper  ">
-      <div class="navbar-content scroll-div ">
-        <br>
-        {% if request.endpoint in ['saved_game', 'team', 'lore', 'equipment', 'abilities', 'game_map', 'settings',
-        'tutorial'] %}
-        {% include 'ingame_sidebar.html' %}
-        {% else %}
-        {% include 'sidebar.html' %}
-        {% endif %}
-
-        {% if subscription == "Premium" %}
-        <div>blah blah blah blah</div>
-        {% else %}
-        <div class="card text-center" style="background-color:white;">
-          <div class="card-body px-3">
-            <i class="feather icon-sunset f-40"></i>
-            <h6 class="mt-3">Upgrade Subscription</h6>
-            <p>To access more activities!</p>
-            <a href="#" target="_blank" class="btn btn-primary btn-sm text-white m-0">Buy now</a>
-          </div>
-        </div>
-        {% endif %}
+	<!-- start sidebar -->
+	<nav class="pcoded-navbar menupos-fixed menu-light ">
+		<div class="navbar-wrapper  ">
+			<div class="navbar-content scroll-div ">
+				<br>
+				<ul class="nav pcoded-inner-navbar ">
+					<li class="nav-item pcoded-menu-caption" style="text-transform: capitalize;">
+						<label>Navigation</label>
+					</li>
+					<li class="nav-item pcoded-hasmenu">
+						<a href="#" class="nav-link "><span class="pcoded-micon"><i
+									class="feather icon-play-circle"></i></span><span class="pcoded-mtext">Games</span></a>
+						<ul class="pcoded-submenu">
+							<li><a href="{{url_for('logout')}}">Logout</a></li>
+							<li><a href="{{url_for('login')}}">login</a></li>
+						</ul>
+					</li>
 
 
+					<li class="nav-item pcoded-hasmenu">
+						<a href="#" class="nav-link "><span class="pcoded-micon"><i class="feather icon-settings"></i></span><span
+								class="pcoded-mtext">Settings</span></a>
+						<ul class="pcoded-submenu">
+							<li><a href="{{url_for('profile')}}">Profile</a></li>
+							<li><a href="{{url_for('subscription')}}">Subscription</a></li>
 
-      </div>
-    </div>
-  </nav>
-  {% endif %}
-  <!-- [ sidebar menu ] end -->
+						</ul>
+					</li>
+				</ul>
 
-  <!-- [ Header ] start -->
-  <header class="navbar pcoded-header navbar-expand-lg navbar-light headerpos-fixed ">
-
-    <div class="m-header">
-      <a href="#!" class="mobile-menu" id="mobile-collapse" style="position:absolute; z-index: 10;"><span></span></a>
-      <a href="#!" class="b-brand">
-        <!-- ========   change your logo here   ============ -->
-        <img src="/static/logo2.png" alt="" class="logo" style="height:50px; width: 50px;">
-        <span style="color: #000; font-size: 1.2rem; margin-left: 10px;">Gridfall Chronicles</span>
-      </a>
-      <a href="#!" class="mob-toggler">
-        <i class="feather icon-more-vertical"></i>
-      </a>
-    </div>
-    <div class="collapse navbar-collapse">
-      <ul class="navbar-nav ms-auto">
-        <li>
-          <div class="dropdown drp-user">
-            <a class="dropdown-toggle" href="#" data-bs-toggle="dropdown">
-              <i class="feather icon-settings"></i>
-            </a>
-            <div class="dropdown-menu dropdown-menu-end">
-              <a href="/logout" class="dropdown-item">
-                <i class="feather icon-log-out"></i> Logout
-              </a>
-            </div>
-          </div>
-        </li>
-      </ul>
-    </div>
+				{% if subscription == "Premium" %}
+				<div>blah blah blah blah</div>
+				{% else %}
+				<div class="card text-center" style="background-color:white;">
+					<div class="card-body px-3">
+						<i class="feather icon-sunset f-40"></i>
+						<h6 class="mt-3">Upgrade Subscription</h6>
+						<p>To access more activities!</p>
+						<a href="{{url_for('subscription')}}" target="_blank" class="btn btn-primary btn-sm text-white m-0">Buy
+							now</a>
+					</div>
+				</div>
+				{% endif %}
 
 
-  </header>
-  <!-- [ Header ] end -->
+
+			</div>
+		</div>
+	</nav>
+	<!-- [ sidebar menu ] end -->
+
+	<!-- [ Header ] start -->
+	<header class="navbar pcoded-header navbar-expand-lg navbar-light headerpos-fixed ">
+
+		<div class="m-header">
+			<a href="#!" class="mobile-menu" id="mobile-collapse" style="position:absolute; z-index: 10;"><span></span></a>
+			<a href="#!" class="b-brand">
+				<!-- ========   change your logo here   ============ -->
+				<img src="/static/assets/images/logo2.png" alt="" class="logo" style="height:50px; width: 175px;">
+			</a>
+			<a href="#!" class="mob-toggler">
+				<i class="feather icon-more-vertical"></i>
+			</a>
+		</div>
+		<div class="collapse navbar-collapse">
+			<ul class="navbar-nav ms-auto">
+				<li>
+					<div class="dropdown drp-user">
+						<a href="#" class="dropdown-item"><i class="feather icon-lock"></i> Logout</a>
+						<!-- <div class="dropdown-menu dropdown-menu-end profile-notification">
+                                <div class="pro-head">
+                                    
+                                </div>
+                                <ul class="pro-body">
+                                    <li>
+                                        </li>
+                                </ul>
+                            </div> -->
+					</div>
+				</li>
+			</ul>
+		</div>
 
 
-  <!-- start page content here -->
-  {% block content %}{% endblock content %}
+	</header>
+	<!-- [ Header ] end -->
 
-  <script src="/static/js/plugins/popper.min.js"></script>
-  <script src="/static/js/plugins/perfect-scrollbar.min.js"></script>
-  <script src="/static/js/plugins/bootstrap.min.js"></script>
-  <script src="/static/js/pcoded.js"></script>
 
-  <script>
-    // menu-toggle
-    document.addEventListener('DOMContentLoaded', function () {
-      const bodyElement = document.querySelector("body");
-      const menuElement = document.getElementById("mobile-collapse");
-      const mobileMenuOverlay = document.querySelector(".pc-mob-header");
+	<!-- start page content here -->
+	{% block content %}{% endblock content %}
 
-      if (menuElement) {
-        menuElement.addEventListener("click", function () {
-          bodyElement.classList.toggle("pc-sidebar-collapse");
-        });
-      }
+	<script src="/static/assets/js/plugins/popper.min.js"></script>
+	<script src="/static/assets/js/plugins/perfect-scrollbar.min.js"></script>
+	<script src="/static/assets/js/plugins/bootstrap.min.js"></script>
+	<script src="/static/assets/js/pcoded.js"></script>
 
-      if (mobileMenuOverlay) {
-        mobileMenuOverlay.addEventListener("click", function () {
-          bodyElement.classList.add("pc-sidebar-collapse");
-        });
-      }
-    });
-  </script>
 
 </body>
 
