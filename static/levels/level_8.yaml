@@ -1,17 +1,17 @@
-background: /static/assets/maps/example.png
+background: /static/maps/example.png
 
-music: /static/assets/audio/background/1.mp3
+music: /static/audio/background/1.mp3
 
 
 enemies:
   - id: enemy_one
-    img: static/assets/enemies/ember_alcolyte.png
+    img: static/enemies/ember/ember_alcolyte.png
     row: 2
     col: 2
     hp: 100
 
   - id: enemy_two
-    img: static/assets/enemies/ember_alcolyte.png
+    img: static/enemies/ember/ember_alcolyte.png
     row: 0
     col: 1
     hp: 100

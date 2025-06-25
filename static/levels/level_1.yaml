@@ -1,7 +1,6 @@
+background: /static/maps/example.png
 
-background: /static/gridfall_static/assets/maps/example.png
-
-music: /static/gridfall_static/assets/audio/background/1.mp3
+music: /static/audio/background/1.mp3
 
 bosses:
   - id: boss_one
@@ -15,9 +14,15 @@ bosses:
 
 enemies:
   - id: enemy_one
-    img: /static/gridfall_static/assets/enemies/ember/ember_alcolyte.png
-    row: 1
+    img: static/enemies/ember/ember_alcolyte.png
+    row: 2
     col: 2
+    hp: 100
+
+  - id: enemy_two
+    img: static/enemies/ember/ember_alcolyte.png
+    row: 0
+    col: 1
     hp: 100
 
 terrain:
