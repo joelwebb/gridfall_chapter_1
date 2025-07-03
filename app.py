@@ -160,6 +160,103 @@ def get_level_data(level_id):
         return jsonify({"error": "Failed to load level data"}), 500
 
 
+@app.route('/api/level-passed', methods=['POST'])
+def level_passed():
+    import base64
+    import json
+    import os
+    from datetime import datetime
+    
+    try:
+        data = request.get_json()
+        level_id = data.get('level_id')
+        state_data = data.get('state_data')
+        completed = data.get('completed', False)
+        timestamp = data.get('timestamp', datetime.now().isoformat())
+        
+        if not level_id or not state_data:
+            return jsonify({"error": "Missing level_id or state_data"}), 400
+        
+        # Decode the B64 state data
+        try:
+            decoded_state = base64.b64decode(state_data.encode('utf-8'))
+            game_state = json.loads(decoded_state.decode('utf-8'))
+        except Exception as e:
+            return jsonify({"error": f"Invalid state data: {e}"}), 400
+        
+        # Create level completion record
+        completion_record = {
+            "level_id": level_id,
+            "completed": completed,
+            "timestamp": timestamp,
+            "final_state": game_state,
+            "username": session.get('username', 'guest'),
+            "stats": {
+                "turns_taken": game_state.get('turn', 0),
+                "rounds_completed": game_state.get('round', 0),
+                "players_alive": len([p for p in game_state.get('players', []) if p.get('hp', 0) > 0]),
+                "enemies_defeated": len([e for e in game_state.get('enemies', []) if e.get('hp', 0) <= 0])
+            }
+        }
+        
+        # Save completion record
+        completions_dir = "level_completions"
+        if not os.path.exists(completions_dir):
+            os.makedirs(completions_dir)
+        
+        completion_file = os.path.join(completions_dir, f"level_{level_id}_completion.json")
+        with open(completion_file, 'w', encoding='utf-8') as f:
+            json.dump(completion_record, f, indent=2, ensure_ascii=False)
+        
+        # Update user progress (you can expand this to save to a database)
+        user_progress_file = f"user_progress_{session.get('username', 'guest')}.json"
+        user_progress = {}
+        
+        if os.path.exists(user_progress_file):
+            with open(user_progress_file, 'r', encoding='utf-8') as f:
+                user_progress = json.load(f)
+        
+        # Update progress
+        if 'levels_completed' not in user_progress:
+            user_progress['levels_completed'] = []
+        
+        level_progress = {
+            "level_id": level_id,
+            "completed_at": timestamp,
+            "stats": completion_record["stats"]
+        }
+        
+        # Remove existing entry for this level if it exists
+        user_progress['levels_completed'] = [
+            lp for lp in user_progress['levels_completed'] 
+            if lp.get('level_id') != level_id
+        ]
+        
+        # Add new completion
+        user_progress['levels_completed'].append(level_progress)
+        user_progress['highest_level'] = max(
+            user_progress.get('highest_level', 0), 
+            int(level_id)
+        )
+        
+        # Save updated progress
+        with open(user_progress_file, 'w', encoding='utf-8') as f:
+            json.dump(user_progress, f, indent=2, ensure_ascii=False)
+        
+        print(f"✅ Level {level_id} completion saved for user {session.get('username', 'guest')}")
+        
+        return jsonify({
+            "success": True,
+            "message": f"Level {level_id} completion recorded",
+            "next_level": int(level_id) + 1,
+            "stats": completion_record["stats"]
+        })
+        
+    except Exception as e:
+        print(f"❌ Error processing level completion: {e}")
+        return jsonify({"error": "Failed to process level completion"}), 500
+
+
 @app.route('/team')
 def team():
     characters = []  # Assuming characters is defined somewhere or can be empty
