@@ -141,25 +141,29 @@
     /* Mobile responsive adjustments */
     @media (max-width: 768px) {
         .grid-container {
-            width: 95vw;
-            max-width: 400px;
-            height: calc(95vw * 8 / 6);
-            max-height: 533px;
+            width: 90vw;
+            max-width: 360px;
+            height: 480px;
             margin: 10px auto;
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            grid-template-rows: repeat(8, 1fr);
+            gap: 1px;
         }
         
         .grid-item {
-            width: calc(100% / 6);
-            height: calc(100% / 8);
-            float: left;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            background: rgba(0, 0, 0, 0.1);
+            width: 100%;
+            height: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            background: rgba(0, 50, 100, 0.3);
+            box-sizing: border-box;
+            min-height: 50px;
         }
         
         .draggable-unit, .enemy-unit {
-            width: calc(100% / 6 - 6px);
-            height: calc(100% / 8 - 6px);
-            margin: 3px;
+            width: 90%;
+            height: 90%;
+            margin: 5%;
         }
         
         .header-container {
@@ -176,15 +180,26 @@
     /* Fallback for very small screens */
     @media (max-width: 480px) {
         .grid-container {
-            width: 98vw;
-            max-width: 360px;
-            height: calc(98vw * 8 / 6);
-            max-height: 480px;
+            width: 95vw;
+            max-width: 320px;
+            height: 427px;
         }
         
         .grid-item {
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            background: rgba(100, 100, 100, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            background: rgba(100, 150, 200, 0.2);
+            min-height: 45px;
+        }
+    }
+
+    /* Desktop fallback */
+    @media (min-width: 769px) {
+        .grid-container {
+            display: block;
+        }
+        
+        .grid-item {
+            float: left;
         }
     }
 </style>
@@ -205,16 +220,34 @@
 </div>
 
 <div class="grid-container" id="grid">
-    <script>
-        for (let i = 0; i < 48; i++) {
-            document.write('<div class="grid-item" data-index="' + i + '"></div>');
-        }
-    </script>
+    <!-- Grid items will be created by JavaScript -->
 </div>
 
 <div style="text-align: center; margin: 10px; color: white; font-size: 12px;">
-    <span id="debug-info">Mobile Grid Loaded</span>
+    <span id="debug-info">Mobile Grid Loading...</span>
 </div>
+
+<script>
+// Create grid items immediately
+$(document).ready(function() {
+    const grid = document.getElementById('grid');
+    if (grid) {
+        for (let i = 0; i < 48; i++) {
+            const gridItem = document.createElement('div');
+            gridItem.className = 'grid-item';
+            gridItem.setAttribute('data-index', i);
+            gridItem.style.border = '1px solid rgba(255, 255, 255, 0.5)';
+            gridItem.style.background = 'rgba(0, 100, 200, 0.2)';
+            grid.appendChild(gridItem);
+        }
+        document.getElementById('debug-info').textContent = 'Grid created with 48 tiles';
+        console.log('✅ Grid created successfully with 48 tiles');
+    } else {
+        document.getElementById('debug-info').textContent = 'Grid container not found!';
+        console.error('❌ Grid container not found');
+    }
+});
+</script>
 
 <!-- Pause Modal -->
 <div id="pause-modal" class="modal">
