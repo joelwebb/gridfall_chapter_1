@@ -242,6 +242,85 @@
         background: linear-gradient(145deg, #4a69a8, #66d9ef) !important;
         box-shadow: 0 0 15px rgba(102, 217, 239, 0.5);
     }
+
+    .pause-btn {
+        cursor: pointer;
+        transition: all 0.2s ease;
+        user-select: none;
+    }
+
+    .pause-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: scale(1.05);
+    }
+
+    .pause-btn:active {
+        transform: scale(0.95);
+    }
+
+    .pause-modal {
+        display: none;
+        position: fixed;
+        z-index: 2000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(5px);
+        animation: fadeIn 0.3s ease;
+    }
+
+    .pause-modal-content {
+        background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
+        margin: 20% auto;
+        padding: 30px;
+        border-radius: 15px;
+        width: 90%;
+        max-width: 300px;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .pause-modal-content h2 {
+        color: white;
+        margin-bottom: 20px;
+        font-size: 24px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-btn {
+        display: block;
+        width: 100%;
+        margin: 10px 0;
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        background: linear-gradient(145deg, #4CAF50, #45a049);
+        color: white;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .modal-btn:hover {
+        background: linear-gradient(145deg, #45a049, #4CAF50);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+    }
+
+    .modal-btn:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
 </style>
 {% endblock %}
 
@@ -255,6 +334,7 @@
                     <div class="status-text">Turn: Player</div>
                     <div class="status-text" id="timer-display">⏱️ 4.000s</div>
                     <div class="status-text" id="level-display">Level: 1</div>
+                    <div class="status-text pause-btn" id="pause-btn">⏸️</div>
                 </div>
 
                 
@@ -264,6 +344,16 @@
                 </div>
             </div>
         </div>
+    </div>
+</div>
+
+<!-- Pause Modal -->
+<div id="pause-modal" class="pause-modal">
+    <div class="pause-modal-content">
+        <h2>Game Paused</h2>
+        <button id="resume-btn" class="modal-btn">Resume Game</button>
+        <button id="return-menu-btn" class="modal-btn">Return to Menu</button>
+        <button id="exit-game-btn" class="modal-btn">Exit Game</button>
     </div>
 </div>
 
@@ -304,12 +394,71 @@ let gameTimer = {
 };
 
 let currentGameState = null;
+let gameIsPaused = false;
 
 document.addEventListener('DOMContentLoaded', function() {
     loadGameLevel().then(() => {
         initializeGame();
+        initializePauseModal();
     });
 });
+
+function initializePauseModal() {
+    const pauseBtn = document.getElementById('pause-btn');
+    const pauseModal = document.getElementById('pause-modal');
+    const resumeBtn = document.getElementById('resume-btn');
+    const returnMenuBtn = document.getElementById('return-menu-btn');
+    const exitGameBtn = document.getElementById('exit-game-btn');
+
+    // Open pause modal
+    pauseBtn.addEventListener('click', function() {
+        pauseGame();
+    });
+
+    // Resume game
+    resumeBtn.addEventListener('click', function() {
+        resumeGame();
+    });
+
+    // Return to menu
+    returnMenuBtn.addEventListener('click', function() {
+        window.location.href = '/dashboard';
+    });
+
+    // Exit game
+    exitGameBtn.addEventListener('click', function() {
+        window.location.href = '/map';
+    });
+
+    // Close modal when clicking outside
+    pauseModal.addEventListener('click', function(e) {
+        if (e.target === pauseModal) {
+            resumeGame();
+        }
+    });
+
+    // Prevent modal content clicks from closing modal
+    document.querySelector('.pause-modal-content').addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+}
+
+function pauseGame() {
+    gameIsPaused = true;
+    stopGameTimer();
+    document.getElementById('pause-modal').style.display = 'block';
+    console.log('⏸️ Game paused');
+}
+
+function resumeGame() {
+    gameIsPaused = false;
+    document.getElementById('pause-modal').style.display = 'none';
+    // Resume timer if it was running
+    if (gameTimer.hasMovedOutside && gameTimer.timeLeft > 0) {
+        startGameTimer();
+    }
+    console.log('▶️ Game resumed');
+}
 
 async function loadGameLevel() {
     try {
@@ -588,6 +737,8 @@ function nextTurn() {
 }
 
 function handleDragStart(e, unit, unitElement) {
+    if (gameIsPaused) return;
+    
     const touch = e.touches[0];
     const rect = unitElement.getBoundingClientRect();
     
@@ -613,7 +764,7 @@ function handleDragStart(e, unit, unitElement) {
 }
 
 function handleDragMove(e) {
-    if (!dragState.isDragging || !dragState.dragElement) return;
+    if (!dragState.isDragging || !dragState.dragElement || gameIsPaused) return;
     
     e.preventDefault();
     const touch = e.touches[0];
