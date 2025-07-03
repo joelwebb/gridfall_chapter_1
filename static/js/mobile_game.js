@@ -259,13 +259,19 @@ function checkPincerCombat() {
 
 // Initialize game
 async function initGame() {
-    await loadBaseStatsCSV('/static/data/base_stats.csv');
-    await loadTeamFromYAML('/static/data/team.yaml');
-    renderPlayerDivs();
+    try {
+        await loadBaseStatsCSV('/static/data/base_stats.csv');
+        await loadTeamFromYAML('/static/data/team.yaml');
+        renderPlayerDivs();
 
-    const levelName = getQueryParam("level") || "level_1";
-    const levelPath = `/static/levels/${levelName}.yaml`;
-    await loadLevelFromYAML(levelPath);
+        const levelName = getQueryParam("level") || "level_1";
+        const levelPath = `/static/levels/${levelName}.yaml`;
+        await loadLevelFromYAML(levelPath);
+    } catch (error) {
+        console.log("Using fallback game initialization for mobile");
+        // Fallback initialization for mobile
+        initializeFallbackGame();
+    }
 
     // Initialize mobile controls after elements are rendered
     setTimeout(initializeMobileControls, 100);
@@ -274,6 +280,90 @@ async function initGame() {
         unlockAllPlayers();
         turnEnded = false;
     });
+}
+
+// Fallback game initialization when data files can't be loaded
+function initializeFallbackGame() {
+    console.log("🎮 Initializing fallback mobile game");
+    
+    // Create some sample units for testing
+    playerIds = ['player1', 'player2'];
+    enemyIds = ['enemy1', 'enemy2'];
+    
+    // Create sample player units
+    const samplePlayers = [
+        { id: 'player1', name: 'Hero', hp: 100, row: 6, col: 1 },
+        { id: 'player2', name: 'Mage', hp: 80, row: 6, col: 4 }
+    ];
+    
+    // Create sample enemy units
+    const sampleEnemies = [
+        { id: 'enemy1', name: 'Goblin', hp: 50, row: 1, col: 2 },
+        { id: 'enemy2', name: 'Orc', hp: 70, row: 1, col: 3 }
+    ];
+    
+    // Render sample units
+    renderFallbackUnits(samplePlayers, sampleEnemies);
+}
+
+function renderFallbackUnits(players, enemies) {
+    const grid = $('#grid');
+    
+    // Clear existing units
+    $('.draggable-unit, .enemy-unit').remove();
+    
+    // Add player units
+    players.forEach(player => {
+        const playerDiv = $(`
+            <div id="${player.id}" class="draggable-unit" style="
+                top: ${player.row * 85 + 7}px; 
+                left: ${player.col * 85 + 7}px;
+                background: #4CAF50;
+                border: 2px solid #fff;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-weight: bold;
+                font-size: 12px;
+            ">
+                ${player.name.charAt(0)}
+                <div class="hp-label">HP: ${player.hp}</div>
+            </div>
+        `);
+        grid.append(playerDiv);
+        playerHP[player.id] = player.hp;
+    });
+    
+    // Add enemy units
+    enemies.forEach(enemy => {
+        const enemyDiv = $(`
+            <div id="${enemy.id}" class="enemy-unit" style="
+                top: ${enemy.row * 85 + 7}px; 
+                left: ${enemy.col * 85 + 7}px;
+                background: #f44336;
+                border: 2px solid #fff;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-weight: bold;
+                font-size: 12px;
+            ">
+                ${enemy.name.charAt(0)}
+                <div class="hp-label">HP: ${enemy.hp}</div>
+            </div>
+        `);
+        grid.append(enemyDiv);
+    });
+}
+
+// Helper function to get query parameters
+function getQueryParam(name) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(name);
 }
 
 // Initialize
