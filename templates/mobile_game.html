@@ -63,7 +63,7 @@
         grid-template-rows: repeat(7, 1fr);
         gap: 1px;
         width: 100%;
-        height: calc(100vh - 160px);
+        height: calc(100vh - 140px);
         background: rgba(0, 0, 0, 0.4);
         border-radius: 8px;
         padding: 10px;
@@ -149,25 +149,53 @@
     }
 
     .mobile-controls {
-        text-align: center;
-        margin-top: 8px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 12px;
+        margin-top: 4px;
     }
 
-    .mobile-btn {
+    .icon-btn {
         background: rgba(255, 255, 255, 0.2);
         color: white;
         border: 1px solid rgba(255, 255, 255, 0.3);
-        padding: 8px 16px;
-        border-radius: 6px;
-        font-size: 12px;
-        margin: 0 5px;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
         cursor: pointer;
         transition: all 0.2s ease;
+        position: relative;
     }
 
-    .mobile-btn:active {
+    .icon-btn:active {
         background: rgba(255, 255, 255, 0.3);
-        transform: scale(0.95);
+        transform: scale(0.9);
+    }
+
+    .tooltip {
+        position: absolute;
+        bottom: 40px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.9);
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 10px;
+        white-space: nowrap;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+        z-index: 1000;
+    }
+
+    .icon-btn:hover .tooltip {
+        opacity: 1;
     }
 
     /* Smaller screens */
@@ -182,9 +210,9 @@
         }
 
         .game-grid {
-            height: calc(100vh - 140px);
+            height: calc(100vh - 120px);
             gap: 0.5px;
-            padding: 8px;
+            padding: 6px;
         }
 
         .grid-cell {
@@ -280,8 +308,14 @@
                 </div>
 
                 <div class="mobile-controls">
-                    <button class="mobile-btn" onclick="resetGame()">Reset</button>
-                    <button class="mobile-btn" onclick="nextTurn()">Next Turn</button>
+                    <div class="icon-btn" onclick="resetGame()">
+                        🔄
+                        <div class="tooltip">Reset Game</div>
+                    </div>
+                    <div class="icon-btn" onclick="nextTurn()">
+                        ⏭️
+                        <div class="tooltip">Next Turn</div>
+                    </div>
                 </div>
 
                 <div class="game-grid" id="gameGrid">
