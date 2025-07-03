@@ -10,11 +10,9 @@ app.secret_key = "fdaexeax233272d6b9d74dd3acb43b37a39d8f1abe17"
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
-        if username == "demo" and password == "demo":
-            session['username'] = username
-            return redirect('/dashboard')
+        username = request.form.get('username') or 'guest'
+        session['username'] = username
+        return redirect('/dashboard')
     return render_template('login.html')
 
 

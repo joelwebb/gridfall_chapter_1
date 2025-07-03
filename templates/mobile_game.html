@@ -1,3 +1,4 @@
+
 {% extends "layout.html" %}
 
 {% block title %}Mobile Game{% endblock %}
@@ -37,7 +38,7 @@
         display: grid;
         grid-template-columns: repeat(5, 1fr);
         grid-template-rows: repeat(7, 1fr);
-        gap: 2px;
+        gap: 1px;
         width: 100%;
         max-width: 500px;
         height: 420px;
@@ -45,31 +46,64 @@
         background: rgba(0, 0, 0, 0.3);
         border-radius: 8px;
         padding: 10px;
+        position: relative;
     }
 
     .grid-cell {
         background: linear-gradient(145deg, #3a5998, #2d4a7d);
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
         border-radius: 4px;
+        position: relative;
+        min-height: 50px;
+    }
+
+    .player-unit {
+        position: absolute;
+        width: 40px;
+        height: 40px;
+        background: radial-gradient(circle, #4CAF50, #2E7D32);
+        border: 2px solid #fff;
+        border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         color: white;
-        font-size: 12px;
         font-weight: bold;
+        font-size: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        z-index: 10;
         transition: all 0.3s ease;
-        cursor: pointer;
-        min-height: 50px;
     }
 
-    .grid-cell:hover {
-        background: linear-gradient(145deg, #4a69a8, #3d5a8d);
-        transform: scale(1.05);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    .enemy-unit {
+        position: absolute;
+        width: 40px;
+        height: 40px;
+        background: radial-gradient(circle, #f44336, #c62828);
+        border: 2px solid #fff;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        z-index: 10;
+        transition: all 0.3s ease;
     }
 
-    .grid-cell:active {
-        transform: scale(0.95);
+    .unit-hp {
+        position: absolute;
+        bottom: -8px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        font-size: 8px;
+        padding: 1px 3px;
+        border-radius: 3px;
+        white-space: nowrap;
     }
 
     /* Mobile responsive */
@@ -86,6 +120,11 @@
 
         .grid-cell {
             min-height: 40px;
+        }
+
+        .player-unit, .enemy-unit {
+            width: 35px;
+            height: 35px;
             font-size: 10px;
         }
     }
@@ -99,6 +138,11 @@
 
         .grid-cell {
             min-height: 30px;
+        }
+
+        .player-unit, .enemy-unit {
+            width: 30px;
+            height: 30px;
             font-size: 8px;
         }
 
@@ -118,33 +162,84 @@
     </div>
 </div>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 // Generate 7x5 grid (7 rows, 5 columns = 35 cells)
 document.addEventListener('DOMContentLoaded', function() {
     const grid = document.getElementById('grid');
 
+    // Create grid cells
     for (let row = 0; row < 7; row++) {
         for (let col = 0; col < 5; col++) {
             const cell = document.createElement('div');
             cell.className = 'grid-cell';
             cell.setAttribute('data-row', row);
             cell.setAttribute('data-col', col);
-            cell.textContent = `${row},${col}`;
-
-            // Add click event for interaction
-            cell.addEventListener('click', function() {
-                console.log(`Clicked cell: Row ${row}, Column ${col}`);
-                this.style.background = 'linear-gradient(145deg, #5a7ab8, #4d6a9d)';
-                setTimeout(() => {
-                    this.style.background = '';
-                }, 200);
-            });
-
             grid.appendChild(cell);
         }
     }
 
-    console.log('✅ Grid created successfully: 7 rows × 5 columns (35 cells)');
+    // Calculate cell position helper
+    function getCellPosition(row, col) {
+        const cellWidth = (grid.offsetWidth - 20) / 5; // subtract padding
+        const cellHeight = (grid.offsetHeight - 20) / 7; // subtract padding
+        return {
+            left: 10 + (col * cellWidth) + (cellWidth / 2) - 20, // center unit in cell
+            top: 10 + (row * cellHeight) + (cellHeight / 2) - 20  // center unit in cell
+        };
+    }
+
+    // Create sample player units
+    const players = [
+        { id: 'player1', name: 'H', hp: 100, row: 6, col: 1 },
+        { id: 'player2', name: 'M', hp: 80, row: 6, col: 3 },
+        { id: 'player3', name: 'A', hp: 90, row: 5, col: 2 }
+    ];
+
+    // Create sample enemy units
+    const enemies = [
+        { id: 'enemy1', name: 'G', hp: 50, row: 0, col: 1 },
+        { id: 'enemy2', name: 'O', hp: 70, row: 1, col: 3 },
+        { id: 'enemy3', name: 'T', hp: 60, row: 0, col: 4 }
+    ];
+
+    // Add player units to grid
+    players.forEach(player => {
+        const pos = getCellPosition(player.row, player.col);
+        const playerDiv = document.createElement('div');
+        playerDiv.id = player.id;
+        playerDiv.className = 'player-unit';
+        playerDiv.style.left = pos.left + 'px';
+        playerDiv.style.top = pos.top + 'px';
+        playerDiv.textContent = player.name;
+        
+        const hpLabel = document.createElement('div');
+        hpLabel.className = 'unit-hp';
+        hpLabel.textContent = `${player.hp}HP`;
+        playerDiv.appendChild(hpLabel);
+        
+        grid.appendChild(playerDiv);
+    });
+
+    // Add enemy units to grid
+    enemies.forEach(enemy => {
+        const pos = getCellPosition(enemy.row, enemy.col);
+        const enemyDiv = document.createElement('div');
+        enemyDiv.id = enemy.id;
+        enemyDiv.className = 'enemy-unit';
+        enemyDiv.style.left = pos.left + 'px';
+        enemyDiv.style.top = pos.top + 'px';
+        enemyDiv.textContent = enemy.name;
+        
+        const hpLabel = document.createElement('div');
+        hpLabel.className = 'unit-hp';
+        hpLabel.textContent = `${enemy.hp}HP`;
+        enemyDiv.appendChild(hpLabel);
+        
+        grid.appendChild(enemyDiv);
+    });
+
+    console.log('✅ Grid created successfully: 7 rows × 5 columns with units');
 });
 </script>
 {% endblock %}
