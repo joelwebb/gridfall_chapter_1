@@ -203,6 +203,35 @@
         background: linear-gradient(135deg, #1e3c72, #2a5298);
         min-height: 100vh;
     }
+
+    /* Prevent pull-to-refresh */
+    body {
+        overscroll-behavior-y: none;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .mobile-game-container {
+        overscroll-behavior: none;
+        touch-action: pan-x pan-y;
+    }
+
+    .game-grid {
+        overscroll-behavior: none;
+        touch-action: none;
+    }
+
+    /* Dragging states */
+    .player-unit.dragging, .enemy-unit.dragging {
+        opacity: 0.8;
+        transform: translate(-50%, -50%) scale(1.1);
+        z-index: 1000;
+        pointer-events: none;
+    }
+
+    .grid-cell.drag-over {
+        background: linear-gradient(145deg, #4a69a8, #66d9ef) !important;
+        box-shadow: 0 0 15px rgba(102, 217, 239, 0.5);
+    }
 </style>
 {% endblock %}
 
@@ -233,6 +262,32 @@
 
 <script>
 console.log('🎮 Mobile Game Starting...');
+
+// Prevent pull-to-refresh
+document.addEventListener('touchstart', function(e) {
+    if (e.touches.length > 1) {
+        e.preventDefault();
+    }
+}, { passive: false });
+
+document.addEventListener('touchmove', function(e) {
+    if (e.touches.length > 1) {
+        e.preventDefault();
+    }
+}, { passive: false });
+
+// Disable zoom
+document.addEventListener('gesturestart', function(e) {
+    e.preventDefault();
+});
+
+let dragState = {
+    isDragging: false,
+    dragElement: null,
+    startPos: { x: 0, y: 0 },
+    offset: { x: 0, y: 0 },
+    originalCell: null
+};
 
 document.addEventListener('DOMContentLoaded', function() {
     initializeGame();
@@ -312,10 +367,18 @@ function createUnit(unit) {
     hpLabel.textContent = unit.hp + 'HP';
     unitDiv.appendChild(hpLabel);
 
-    // Add click handler
+    // Add touch drag handlers
+    unitDiv.addEventListener('touchstart', function(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        handleDragStart(e, unit, unitDiv);
+    }, { passive: false });
+
     unitDiv.addEventListener('click', function(e) {
         e.stopPropagation();
-        handleUnitClick(unit);
+        if (!dragState.isDragging) {
+            handleUnitClick(unit);
+        }
     });
 
     // Position unit in the cell
@@ -358,6 +421,105 @@ function resetGame() {
 function nextTurn() {
     console.log('⏭️ Next turn...');
     // Add turn logic here
+}
+
+function handleDragStart(e, unit, unitElement) {
+    const touch = e.touches[0];
+    const rect = unitElement.getBoundingClientRect();
+    
+    dragState.isDragging = true;
+    dragState.dragElement = unitElement;
+    dragState.startPos = { x: touch.clientX, y: touch.clientY };
+    dragState.offset = {
+        x: touch.clientX - rect.left - rect.width / 2,
+        y: touch.clientY - rect.top - rect.height / 2
+    };
+    dragState.originalCell = unitElement.parentElement;
+    
+    unitElement.classList.add('dragging');
+    console.log('🎯 Started dragging: ' + unit.name);
+    
+    // Add global touch handlers
+    document.addEventListener('touchmove', handleDragMove, { passive: false });
+    document.addEventListener('touchend', handleDragEnd, { passive: false });
+}
+
+function handleDragMove(e) {
+    if (!dragState.isDragging || !dragState.dragElement) return;
+    
+    e.preventDefault();
+    const touch = e.touches[0];
+    
+    // Move the unit to follow touch
+    const grid = document.getElementById('gameGrid');
+    const gridRect = grid.getBoundingClientRect();
+    
+    const x = touch.clientX - gridRect.left - dragState.offset.x;
+    const y = touch.clientY - gridRect.top - dragState.offset.y;
+    
+    dragState.dragElement.style.position = 'fixed';
+    dragState.dragElement.style.left = (touch.clientX - dragState.offset.x) + 'px';
+    dragState.dragElement.style.top = (touch.clientY - dragState.offset.y) + 'px';
+    dragState.dragElement.style.zIndex = '1000';
+    
+    // Highlight target cell
+    const targetCell = getCellUnderTouch(touch.clientX, touch.clientY);
+    document.querySelectorAll('.grid-cell').forEach(cell => {
+        cell.classList.remove('drag-over');
+    });
+    
+    if (targetCell && !targetCell.querySelector('.player-unit, .enemy-unit')) {
+        targetCell.classList.add('drag-over');
+    }
+}
+
+function handleDragEnd(e) {
+    if (!dragState.isDragging || !dragState.dragElement) return;
+    
+    const touch = e.changedTouches[0];
+    const targetCell = getCellUnderTouch(touch.clientX, touch.clientY);
+    
+    // Remove drag styling
+    dragState.dragElement.classList.remove('dragging');
+    dragState.dragElement.style.position = 'absolute';
+    dragState.dragElement.style.zIndex = '10';
+    
+    // Clear drag highlights
+    document.querySelectorAll('.grid-cell').forEach(cell => {
+        cell.classList.remove('drag-over');
+    });
+    
+    if (targetCell && !targetCell.querySelector('.player-unit, .enemy-unit')) {
+        // Valid drop - move unit to new cell
+        targetCell.style.position = 'relative';
+        targetCell.appendChild(dragState.dragElement);
+        
+        dragState.dragElement.style.left = '';
+        dragState.dragElement.style.top = '';
+        
+        const row = targetCell.getAttribute('data-row');
+        const col = targetCell.getAttribute('data-col');
+        console.log('✅ Moved unit to cell (' + row + ',' + col + ')');
+    } else {
+        // Invalid drop - return to original position
+        dragState.originalCell.appendChild(dragState.dragElement);
+        dragState.dragElement.style.left = '';
+        dragState.dragElement.style.top = '';
+        console.log('❌ Invalid drop, returned to original position');
+    }
+    
+    // Clean up
+    dragState.isDragging = false;
+    dragState.dragElement = null;
+    dragState.originalCell = null;
+    
+    document.removeEventListener('touchmove', handleDragMove);
+    document.removeEventListener('touchend', handleDragEnd);
+}
+
+function getCellUnderTouch(x, y) {
+    const elements = document.elementsFromPoint(x, y);
+    return elements.find(el => el.classList.contains('grid-cell'));
 }
 </script>
 {% endblock %}
