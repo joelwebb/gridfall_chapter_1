@@ -102,6 +102,25 @@
 
 {% block content %}
 
+<script>
+// Check if screen is mobile/tablet size and redirect to mobile game
+function checkScreenSizeAndRedirect() {
+    const screenWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+    const isMobile = screenWidth < 1024; // Consider anything less than 1024px as mobile/tablet
+    
+    if (isMobile) {
+        const currentLevel = new URLSearchParams(window.location.search).get('level') || 'level_1';
+        window.location.href = `/mobile_game?level=${currentLevel}`;
+    }
+}
+
+// Check on page load
+document.addEventListener('DOMContentLoaded', checkScreenSizeAndRedirect);
+
+// Also check on window resize in case user resizes browser
+window.addEventListener('resize', checkScreenSizeAndRedirect);
+</script>
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
 <script src="/static/js/boss_loader.js"></script>
