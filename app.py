@@ -1,4 +1,4 @@
-from flask import Flask, redirect, request, render_template, url_for, session, make_response
+from flask import Flask, redirect, request, render_template, url_for, session, make_response, jsonify
 from datetime import datetime
 from functools import wraps
 import uuid
@@ -115,8 +115,49 @@ def new_play_game():
 
 @app.route('/mobile_game')
 def mobile_game():
-    level = request.args.get('level', 'level_1')
-    return render_template('mobile_game.html', level=level)
+    return render_template('mobile_game.html')
+
+@app.route('/api/level/<int:level_id>')
+def get_level_data(level_id):
+    import base64
+    import json
+    import os
+
+    try:
+        # Try to load level state file
+        level_file_path = f"level_states/level_{level_id}.json"
+
+        if os.path.exists(level_file_path):
+            with open(level_file_path, 'r', encoding='utf-8') as f:
+                level_data = json.load(f)
+            return jsonify(level_data)
+        else:
+            # Create default level state if file doesn't exist
+            with open("example-state-dictionary.json", 'r', encoding='utf-8') as f:
+                default_state = json.load(f)
+
+            # Modify for the requested level
+            default_state['level'] = level_id
+            default_state['background'] = f"/static/maps/level_{level_id}.png" if level_id > 1 else "/static/maps/example.png"
+            default_state['music'] = f"/static/audio/background/{level_id}.mp3" if level_id <= 5 else "/static/audio/background/1.mp3"
+
+            # Encode state to base64
+            json_string = json.dumps(default_state, separators=(',', ':'))
+            encoded_state = base64.b64encode(json_string.encode('utf-8')).decode('utf-8')
+
+            return jsonify({
+                "level_id": level_id,
+                "state_data": encoded_state,
+                "metadata": {
+                    "created_at": "2025-01-27",
+                    "version": "1.0",
+                    "description": f"Level {level_id} game state"
+                }
+            })
+
+    except Exception as e:
+        print(f"Error loading level {level_id}: {e}")
+        return jsonify({"error": "Failed to load level data"}), 500
 
 
 @app.route('/team')

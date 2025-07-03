@@ -68,7 +68,10 @@
         border-radius: 8px;
         padding: 10px;
         flex: 1;
-        margin-top: 8px;
+        margin-top: 0;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
     }
 
     .grid-cell {
@@ -327,9 +330,101 @@ let gameTimer = {
     hasMovedOutside: false
 };
 
+let currentGameState = null;
+
 document.addEventListener('DOMContentLoaded', function() {
-    initializeGame();
+    loadGameLevel().then(() => {
+        initializeGame();
+    });
 });
+
+async function loadGameLevel() {
+    try {
+        // Get level from URL parameter or default to level 1
+        const urlParams = new URLSearchParams(window.location.search);
+        const levelId = urlParams.get('level') || '1';
+        
+        // Load level data from backend
+        const response = await fetch(`/api/level/${levelId}`);
+        if (response.ok) {
+            const levelData = await response.json();
+            currentGameState = decodeLevelState(levelData.state_data);
+            
+            // Set background image
+            if (currentGameState.background) {
+                const grid = document.getElementById('gameGrid');
+                grid.style.backgroundImage = `url(${currentGameState.background})`;
+                grid.style.backgroundColor = 'rgba(0, 0, 0, 0.3)'; // Semi-transparent overlay
+            }
+            
+            // Load background music
+            if (currentGameState.music) {
+                loadBackgroundMusic(currentGameState.music);
+            }
+            
+            console.log('🎮 Level state loaded:', currentGameState);
+        } else {
+            console.warn('⚠️ Failed to load level, using default state');
+            currentGameState = getDefaultGameState();
+        }
+    } catch (error) {
+        console.error('❌ Error loading level:', error);
+        currentGameState = getDefaultGameState();
+    }
+}
+
+function decodeLevelState(base64Data) {
+    try {
+        const decodedData = atob(base64Data);
+        return JSON.parse(decodedData);
+    } catch (error) {
+        console.error('❌ Failed to decode level state:', error);
+        return getDefaultGameState();
+    }
+}
+
+function getDefaultGameState() {
+    return {
+        level: 1,
+        background: '/static/maps/example.png',
+        music: '/static/audio/background/1.mp3',
+        players: [
+            { id: 'player1', name: 'H', hp: 100, maxHp: 100, row: 6, col: 1, type: 'player', img: '/static/players/arin.png' },
+            { id: 'player2', name: 'M', hp: 80, maxHp: 100, row: 6, col: 3, type: 'player', img: '/static/players/almarai.png' },
+            { id: 'player3', name: 'A', hp: 90, maxHp: 100, row: 5, col: 2, type: 'player', img: '/static/players/dante.png' }
+        ],
+        enemies: [
+            { id: 'enemy1', name: 'G', hp: 50, maxHp: 60, row: 0, col: 1, type: 'enemy', img: '/static/enemies/ember/ember_alcolyte.png' },
+            { id: 'enemy2', name: 'O', hp: 70, maxHp: 80, row: 1, col: 3, type: 'enemy', img: '/static/enemies/ember/ember_alcolyte.png' },
+            { id: 'enemy3', name: 'T', hp: 40, maxHp: 60, row: 0, col: 5, type: 'enemy', img: '/static/enemies/ember/ember_alcolyte.png' }
+        ],
+        bosses: [],
+        terrain: [
+            { type: 'spikes', damage: 15, row: 3, col: 2, img: '/static/terrain/spikes.png' },
+            { type: 'poison', damage: 10, row: 4, col: 4, img: '/static/terrain/poison.png' }
+        ]
+    };
+}
+
+function loadBackgroundMusic(musicUrl) {
+    try {
+        const audio = document.createElement('audio');
+        audio.src = musicUrl;
+        audio.loop = true;
+        audio.volume = 0.3;
+        audio.id = 'game-background-music';
+        
+        // Auto-play on user interaction
+        document.addEventListener('click', function playMusic() {
+            audio.play().catch(err => console.log('Music autoplay prevented:', err));
+            document.removeEventListener('click', playMusic);
+        }, { once: true });
+        
+        document.body.appendChild(audio);
+    } catch (error) {
+        console.error('❌ Failed to load background music:', error);
+    }
+}
 
 function initializeGame() {
     const grid = document.getElementById('gameGrid');
@@ -366,20 +461,24 @@ function initializeGame() {
         }
     }
 
-    // Sample game units
-    const gameUnits = [
-        { id: 'player1', name: 'H', hp: 100, maxHp: 100, row: 6, col: 1, type: 'player' },
-        { id: 'player2', name: 'M', hp: 80, maxHp: 100, row: 6, col: 3, type: 'player' },
-        { id: 'player3', name: 'A', hp: 90, maxHp: 100, row: 5, col: 2, type: 'player' },
-        { id: 'enemy1', name: 'G', hp: 50, maxHp: 60, row: 0, col: 1, type: 'enemy' },
-        { id: 'enemy2', name: 'O', hp: 70, maxHp: 80, row: 1, col: 3, type: 'enemy' },
-        { id: 'enemy3', name: 'T', hp: 40, maxHp: 60, row: 0, col: 5, type: 'enemy' }
+    // Use loaded game state or default
+    const allUnits = [
+        ...(currentGameState?.players || []),
+        ...(currentGameState?.enemies || []),
+        ...(currentGameState?.bosses || [])
     ];
 
     // Create and position units
-    gameUnits.forEach(function(unit) {
+    allUnits.forEach(function(unit) {
         createUnit(unit);
     });
+
+    // Create terrain
+    if (currentGameState?.terrain) {
+        currentGameState.terrain.forEach(function(terrain) {
+            createTerrain(terrain);
+        });
+    }
 
     console.log('🎉 Mobile game initialized successfully!');
     console.log('📊 Grid: ' + rows + ' rows × ' + cols + ' columns');
@@ -624,6 +723,36 @@ function handleDragEnd(e) {
     
     document.removeEventListener('touchmove', handleDragMove);
     document.removeEventListener('touchend', handleDragEnd);
+}
+
+function createTerrain(terrain) {
+    const targetCell = document.querySelector('[data-row="' + terrain.row + '"][data-col="' + terrain.col + '"]');
+    if (!targetCell) {
+        console.error('❌ Target cell not found for terrain:', terrain.type);
+        return;
+    }
+
+    const terrainDiv = document.createElement('div');
+    terrainDiv.className = 'terrain-element';
+    terrainDiv.style.cssText = `
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        background-image: url(${terrain.img});
+        background-size: cover;
+        background-position: center;
+        top: 5px;
+        right: 5px;
+        z-index: 5;
+        border-radius: 3px;
+        opacity: 0.8;
+    `;
+    terrainDiv.title = `${terrain.type} (${terrain.damage} damage)`;
+
+    targetCell.style.position = 'relative';
+    targetCell.appendChild(terrainDiv);
+    
+    console.log('🗿 Added terrain: ' + terrain.type + ' at (' + terrain.row + ',' + terrain.col + ')');
 }
 
 function getCellUnderTouch(x, y) {

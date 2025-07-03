@@ -1,0 +1,320 @@
+
+{
+  "level": 1,
+  "name": "Tutorial Level",
+  "description": "Learn the basics of combat and movement",
+  "background": "/static/maps/example.png",
+  "music": "/static/audio/background/1.mp3",
+  "grid": {
+    "rows": 7,
+    "columns": 6,
+    "tileSize": 85
+  },
+  "timer": {
+    "duration": 4000,
+    "enabled": true
+  },
+  "victory_conditions": {
+    "type": "eliminate_all_enemies",
+    "target_count": 3
+  },
+  "defeat_conditions": {
+    "type": "all_players_defeated",
+    "lives_remaining": 3
+  },
+  "players": [
+    {
+      "id": "player1",
+      "name": "Hero",
+      "character_class": "Warrior",
+      "hp": 100,
+      "maxHp": 100,
+      "mp": 20,
+      "maxMp": 20,
+      "row": 6,
+      "col": 1,
+      "type": "player",
+      "img": "/static/players/arin.png",
+      "abilities": ["slash", "heal"],
+      "equipment": ["sword", "shield", "helmet"],
+      "stats": {
+        "attack": 45,
+        "defense": 35,
+        "speed": 15,
+        "magic": 10
+      },
+      "status_effects": [],
+      "movement_range": 3,
+      "attack_range": 1
+    },
+    {
+      "id": "player2",
+      "name": "Mage",
+      "character_class": "Mage",
+      "hp": 80,
+      "maxHp": 100,
+      "mp": 40,
+      "maxMp": 40,
+      "row": 6,
+      "col": 3,
+      "type": "player",
+      "img": "/static/players/almarai.png",
+      "abilities": ["fireball", "chain_heal"],
+      "equipment": ["lucent_sceptre", "ember_pendant"],
+      "stats": {
+        "attack": 25,
+        "defense": 20,
+        "speed": 12,
+        "magic": 50
+      },
+      "status_effects": [],
+      "movement_range": 2,
+      "attack_range": 3
+    },
+    {
+      "id": "player3",
+      "name": "Archer",
+      "character_class": "Ranger",
+      "hp": 90,
+      "maxHp": 100,
+      "mp": 25,
+      "maxMp": 25,
+      "row": 5,
+      "col": 2,
+      "type": "player",
+      "img": "/static/players/dante.png",
+      "abilities": ["whirling_slash", "blinding_light"],
+      "equipment": ["bow", "ring_of_life"],
+      "stats": {
+        "attack": 40,
+        "defense": 25,
+        "speed": 20,
+        "magic": 15
+      },
+      "status_effects": [],
+      "movement_range": 4,
+      "attack_range": 2
+    }
+  ],
+  "enemies": [
+    {
+      "id": "enemy1",
+      "name": "Goblin",
+      "enemy_type": "ember_acolyte",
+      "hp": 50,
+      "maxHp": 60,
+      "mp": 10,
+      "maxMp": 10,
+      "row": 0,
+      "col": 1,
+      "type": "enemy",
+      "img": "/static/enemies/ember/ember_alcolyte.png",
+      "abilities": ["basic_attack"],
+      "equipment": [],
+      "stats": {
+        "attack": 25,
+        "defense": 15,
+        "speed": 10,
+        "magic": 5
+      },
+      "ai_type": "aggressive",
+      "movement_range": 2,
+      "attack_range": 1,
+      "behavior": {
+        "priority_targets": ["player"],
+        "movement_pattern": "seek_closest",
+        "special_abilities": []
+      }
+    },
+    {
+      "id": "enemy2",
+      "name": "Orc",
+      "enemy_type": "ember_warrior",
+      "hp": 70,
+      "maxHp": 80,
+      "mp": 5,
+      "maxMp": 5,
+      "row": 1,
+      "col": 3,
+      "type": "enemy",
+      "img": "/static/enemies/ember/ember_alcolyte.png",
+      "abilities": ["basic_attack", "ember_flare"],
+      "equipment": [],
+      "stats": {
+        "attack": 30,
+        "defense": 20,
+        "speed": 8,
+        "magic": 10
+      },
+      "ai_type": "defensive",
+      "movement_range": 1,
+      "attack_range": 1,
+      "behavior": {
+        "priority_targets": ["player"],
+        "movement_pattern": "guard_area",
+        "special_abilities": ["ember_flare"]
+      }
+    },
+    {
+      "id": "enemy3",
+      "name": "Troll",
+      "enemy_type": "ember_berserker",
+      "hp": 40,
+      "maxHp": 60,
+      "mp": 0,
+      "maxMp": 0,
+      "row": 0,
+      "col": 5,
+      "type": "enemy",
+      "img": "/static/enemies/ember/ember_alcolyte.png",
+      "abilities": ["basic_attack"],
+      "equipment": [],
+      "stats": {
+        "attack": 35,
+        "defense": 10,
+        "speed": 12,
+        "magic": 0
+      },
+      "ai_type": "berserker",
+      "movement_range": 3,
+      "attack_range": 1,
+      "behavior": {
+        "priority_targets": ["player"],
+        "movement_pattern": "charge",
+        "special_abilities": []
+      }
+    }
+  ],
+  "bosses": [
+    {
+      "id": "boss1",
+      "name": "Infernal Demon",
+      "boss_type": "flame_lord",
+      "hp": 200,
+      "maxHp": 200,
+      "mp": 50,
+      "maxMp": 50,
+      "row": 2,
+      "col": 2,
+      "type": "boss",
+      "img": "/static/bosses/images/infernal_demon.png",
+      "abilities": ["fireball", "ember_flare", "holy_cross"],
+      "equipment": [],
+      "stats": {
+        "attack": 60,
+        "defense": 40,
+        "speed": 5,
+        "magic": 70
+      },
+      "ai_type": "boss",
+      "movement_range": 1,
+      "attack_range": 4,
+      "phases": [
+        {
+          "hp_threshold": 100,
+          "abilities": ["fireball"],
+          "behavior": "defensive"
+        },
+        {
+          "hp_threshold": 50,
+          "abilities": ["fireball", "ember_flare"],
+          "behavior": "aggressive"
+        },
+        {
+          "hp_threshold": 25,
+          "abilities": ["fireball", "ember_flare", "holy_cross"],
+          "behavior": "berserk"
+        }
+      ]
+    }
+  ],
+  "terrain": [
+    {
+      "id": "terrain1",
+      "type": "spikes",
+      "damage": 15,
+      "row": 3,
+      "col": 2,
+      "img": "/static/terrain/spikes.png",
+      "effects": {
+        "on_enter": {
+          "damage": 15,
+          "status": "bleeding"
+        },
+        "on_stay": {
+          "damage": 5
+        }
+      },
+      "passable": true,
+      "blocks_vision": false
+    },
+    {
+      "id": "terrain2",
+      "type": "poison",
+      "damage": 10,
+      "row": 4,
+      "col": 4,
+      "img": "/static/terrain/poison.png",
+      "effects": {
+        "on_enter": {
+          "damage": 10,
+          "status": "poisoned"
+        },
+        "on_stay": {
+          "damage": 3
+        }
+      },
+      "passable": true,
+      "blocks_vision": false
+    }
+  ],
+  "items": [
+    {
+      "id": "health_potion",
+      "name": "Health Potion",
+      "type": "consumable",
+      "row": 4,
+      "col": 1,
+      "img": "/static/items/health_potion.png",
+      "effects": {
+        "heal": 30,
+        "mp_restore": 0
+      },
+      "rarity": "common"
+    }
+  ],
+  "environmental": {
+    "lighting": "normal",
+    "weather": "clear",
+    "temperature": "normal",
+    "special_effects": []
+  },
+  "scripted_events": [
+    {
+      "trigger": "turn_3",
+      "type": "dialogue",
+      "content": "Watch out for the spikes ahead!",
+      "speaker": "Tutorial Guide"
+    },
+    {
+      "trigger": "enemy_hp_below_25",
+      "type": "spawn_enemy",
+      "enemy_id": "reinforcement1",
+      "position": [0, 4]
+    }
+  ],
+  "rewards": {
+    "experience": 100,
+    "gold": 50,
+    "items": ["health_potion", "mana_potion"],
+    "equipment": [],
+    "abilities": []
+  },
+  "metadata": {
+    "created_at": "2025-01-27",
+    "version": "1.0",
+    "difficulty": "easy",
+    "estimated_duration": "5-10 minutes",
+    "tags": ["tutorial", "combat", "movement"]
+  }
+}
