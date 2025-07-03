@@ -28,7 +28,25 @@
 		.pcoded-navbar .pcoded-inner-navbar li a:hover {
 			color: rgba(255, 255, 255, 1);
 			box-shadow: 0 5px 15px rgba(145, 92, 182, .4);
-
+		}
+		
+		/* Mobile sidebar improvements */
+		@media (max-width: 768px) {
+			.pcoded-navbar .main-menu-header {
+				display: none !important;
+			}
+			
+			.pcoded-navbar .navbar-wrapper {
+				padding-top: 10px;
+			}
+			
+			.pcoded-navbar .pcoded-inner-navbar {
+				padding-top: 0;
+			}
+			
+			.pcoded-navbar {
+				width: 250px !important;
+			}
 		}
 	</style>
 </head>
