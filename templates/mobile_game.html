@@ -240,10 +240,11 @@
     <div class="pcoded-content">
         <div class="mobile-game-container">
             <div class="mobile-card">
-                <div class="mobile-card-title">Mobile Battle Grid (6×7)</div>
+                <div class="mobile-card-title">Level: 1</div>
 
                 <div class="game-info">
                     <div class="status-text">Turn: Player</div>
+                    <div class="status-text" id="timer-display">⏱️ 4.000s</div>
                     <div class="status-text">Grid: 6×7</div>
                 </div>
 
@@ -287,6 +288,13 @@ let dragState = {
     startPos: { x: 0, y: 0 },
     offset: { x: 0, y: 0 },
     originalCell: null
+};
+
+let gameTimer = {
+    isRunning: false,
+    timeLeft: 4000,
+    interval: null,
+    hasMovedOutside: false
 };
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -413,13 +421,67 @@ function handleUnitClick(unit) {
     }
 }
 
+function updateTimerDisplay() {
+    const timerElement = document.getElementById('timer-display');
+    if (timerElement) {
+        const seconds = (gameTimer.timeLeft / 1000).toFixed(3);
+        timerElement.textContent = `⏱️ ${seconds}s`;
+    }
+}
+
+function startGameTimer() {
+    if (gameTimer.isRunning) return;
+    
+    gameTimer.isRunning = true;
+    gameTimer.timeLeft = 4000;
+    
+    gameTimer.interval = setInterval(() => {
+        gameTimer.timeLeft -= 10;
+        updateTimerDisplay();
+        
+        if (gameTimer.timeLeft <= 0) {
+            stopGameTimer();
+            endPlayerTurn();
+        }
+    }, 10);
+    
+    console.log('⏱️ Timer started - 4 seconds');
+}
+
+function stopGameTimer() {
+    if (gameTimer.interval) {
+        clearInterval(gameTimer.interval);
+        gameTimer.interval = null;
+    }
+    gameTimer.isRunning = false;
+    console.log('⏱️ Timer stopped');
+}
+
+function resetGameTimer() {
+    stopGameTimer();
+    gameTimer.timeLeft = 4000;
+    gameTimer.hasMovedOutside = false;
+    updateTimerDisplay();
+}
+
+function endPlayerTurn() {
+    console.log('⏰ Time\'s up! Turn ended.');
+    if (dragState.dragElement) {
+        // Force drop at current position or return to safe position
+        const fakeEvent = { changedTouches: [{ clientX: 0, clientY: 0 }] };
+        handleDragEnd(fakeEvent);
+    }
+}
+
 function resetGame() {
     console.log('🔄 Resetting game...');
+    resetGameTimer();
     initializeGame();
 }
 
 function nextTurn() {
     console.log('⏭️ Next turn...');
+    resetGameTimer();
     // Add turn logic here
 }
 
@@ -435,6 +497,10 @@ function handleDragStart(e, unit, unitElement) {
         y: touch.clientY - rect.top - rect.height / 2
     };
     dragState.originalCell = unitElement.parentElement;
+    
+    // Store the initial cell for timer logic
+    unit.initialCell = dragState.originalCell;
+    gameTimer.hasMovedOutside = false;
     
     unitElement.classList.add('dragging');
     console.log('🎯 Started dragging: ' + unit.name);
@@ -462,8 +528,15 @@ function handleDragMove(e) {
     dragState.dragElement.style.top = (touch.clientY - dragState.offset.y) + 'px';
     dragState.dragElement.style.zIndex = '1000';
     
-    // Highlight target cell
+    // Check if player has moved outside their initial cell and start timer
     const targetCell = getCellUnderTouch(touch.clientX, touch.clientY);
+    if (targetCell && targetCell !== dragState.originalCell && !gameTimer.hasMovedOutside) {
+        gameTimer.hasMovedOutside = true;
+        startGameTimer();
+        console.log('🎯 Player moved outside initial cell - timer started!');
+    }
+    
+    // Highlight target cell
     document.querySelectorAll('.grid-cell').forEach(cell => {
         cell.classList.remove('drag-over');
     });
@@ -478,6 +551,9 @@ function handleDragEnd(e) {
     
     const touch = e.changedTouches[0];
     const targetCell = getCellUnderTouch(touch.clientX, touch.clientY);
+    
+    // Stop the timer when drag ends
+    stopGameTimer();
     
     // Remove drag styling
     dragState.dragElement.classList.remove('dragging');
@@ -507,6 +583,9 @@ function handleDragEnd(e) {
         dragState.dragElement.style.top = '';
         console.log('❌ Invalid drop, returned to original position');
     }
+    
+    // Reset timer for next turn
+    resetGameTimer();
     
     // Clean up
     dragState.isDragging = false;
