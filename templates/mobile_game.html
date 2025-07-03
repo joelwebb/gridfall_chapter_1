@@ -1,4 +1,3 @@
-
 {% extends "layout.html" %}
 
 {% block title %}Mobile Game{% endblock %}
@@ -187,7 +186,7 @@
 {% block content %}
 <div class="card">
     <div class="card-title">Mobile Battle Grid (6×7)</div>
-    
+
     <div class="game-info">
         <div class="status-text">Turn: Player</div>
         <div class="status-text">Grid: 6 Cols × 7 Rows</div>
@@ -198,12 +197,14 @@
     </div>
 </div>
 
+<!-- <script src="/static/js/mobile_game.js"></script> -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🎮 Mobile Game Starting...');
-    
+
     const grid = document.getElementById('gameGrid');
-    
+
     if (!grid) {
         console.error('❌ Grid element not found!');
         return;
@@ -216,7 +217,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const rows = 7;
     const cols = 6;
     const totalCells = rows * cols;
-    
+
     console.log(`📐 Creating ${rows}×${cols} grid (${totalCells} cells)`);
 
     // Generate grid cells
@@ -236,7 +237,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const gridRect = grid.getBoundingClientRect();
         const cellWidth = (gridRect.width - 20) / cols; // subtract padding
         const cellHeight = (gridRect.height - 20) / rows; // subtract padding
-        
+
         return {
             left: 10 + (col * cellWidth) + (cellWidth / 2) - 20, // center in cell
             top: 10 + (row * cellHeight) + (cellHeight / 2) - 20  // center in cell
@@ -266,12 +267,12 @@ document.addEventListener('DOMContentLoaded', function() {
         unitDiv.style.top = pos.top + 'px';
         unitDiv.textContent = unit.name;
         unitDiv.title = `${unit.name} (Player) - HP: ${unit.hp}/${unit.maxHp}`;
-        
+
         const hpLabel = document.createElement('div');
         hpLabel.className = 'unit-hp';
         hpLabel.textContent = `${unit.hp}HP`;
         unitDiv.appendChild(hpLabel);
-        
+
         grid.appendChild(unitDiv);
         console.log(`✅ Added player unit: ${unit.name} at (${unit.row},${unit.col})`);
     });
@@ -286,12 +287,12 @@ document.addEventListener('DOMContentLoaded', function() {
         unitDiv.style.top = pos.top + 'px';
         unitDiv.textContent = unit.name;
         unitDiv.title = `${unit.name} (Enemy) - HP: ${unit.hp}/${unit.maxHp}`;
-        
+
         const hpLabel = document.createElement('div');
         hpLabel.className = 'unit-hp';
         hpLabel.textContent = `${unit.hp}HP`;
         unitDiv.appendChild(hpLabel);
-        
+
         grid.appendChild(unitDiv);
         console.log(`✅ Added enemy unit: ${unit.name} at (${unit.row},${unit.col})`);
     });
