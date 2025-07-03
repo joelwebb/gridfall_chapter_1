@@ -12,6 +12,7 @@
         flex-direction: column;
         gap: 0;
         height: 100vh;
+        height: 100svh; /* Use small viewport height for mobile */
         overflow: hidden;
     }
 
@@ -63,7 +64,7 @@
         grid-template-rows: repeat(7, 1fr);
         gap: 1px;
         width: 100%;
-        height: calc(100vh - 180px);
+        height: calc(100vh - 220px);
         background: rgba(0, 0, 0, 0.4);
         border-radius: 8px;
         padding: 10px;
@@ -162,7 +163,7 @@
         }
 
         .game-grid {
-            height: calc(100vh - 160px);
+            height: calc(100vh - 200px);
             gap: 0.5px;
             padding: 6px;
         }
