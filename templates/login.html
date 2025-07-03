@@ -3,5 +3,101 @@
 {% block title %}Login Game{% endblock %}
 
 {% block content %}
-<h2>Welcome to Gridfall!</h2>
+<div class="auth-wrapper">
+    <div class="auth-content">
+        <div class="card">
+            <div class="card-body text-center">
+                <div class="mb-4">
+                    <h2>Welcome to Gridfall!</h2>
+                    <p class="mb-4">Sign in to your account to continue</p>
+                </div>
+                <form method="POST">
+                    <div class="mb-3">
+                        <input type="text" name="username" class="form-control" placeholder="Username" required>
+                    </div>
+                    <div class="mb-3">
+                        <input type="password" name="password" class="form-control" placeholder="Password" required>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Sign In</button>
+                    </div>
+                </form>
+                <div class="saprator mt-3">
+                    <span>OR</span>
+                </div>
+                <div class="text-center mt-3">
+                    <p class="mb-0">Don't have an account? <a href="/register">Sign up</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+@media (max-width: 768px) {
+    .auth-wrapper {
+        padding: 15px;
+    }
+    
+    .auth-content {
+        width: 100% !important;
+        max-width: 400px;
+        margin: 0 auto;
+    }
+    
+    .card {
+        margin: 20px 0;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .card-body {
+        padding: 30px 20px !important;
+    }
+    
+    h2 {
+        font-size: 1.5rem;
+        margin-bottom: 10px;
+    }
+    
+    .form-control {
+        padding: 12px 15px;
+        font-size: 16px; /* Prevents zoom on iOS */
+        border-radius: 8px;
+    }
+    
+    .btn {
+        padding: 12px 20px;
+        font-size: 16px;
+        border-radius: 8px;
+    }
+}
+
+.auth-wrapper {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.auth-content {
+    position: relative;
+    z-index: 5;
+}
+
+.form-control:focus {
+    border-color: #4099ff;
+    box-shadow: 0 0 0 0.2rem rgba(64, 153, 255, 0.25);
+}
+
+.btn-primary {
+    background-color: #4099ff;
+    border-color: #4099ff;
+}
+
+.btn-primary:hover {
+    background-color: #3182ce;
+    border-color: #3182ce;
+}
+</style>
 {% endblock %}
