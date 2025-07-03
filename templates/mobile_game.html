@@ -258,6 +258,21 @@
         transform: scale(0.95);
     }
 
+    .help-btn {
+        cursor: pointer;
+        transition: all 0.2s ease;
+        user-select: none;
+    }
+
+    .help-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: scale(1.05);
+    }
+
+    .help-btn:active {
+        transform: scale(0.95);
+    }
+
     .pause-modal {
         display: none;
         position: fixed;
@@ -321,6 +336,118 @@
         from { opacity: 0; }
         to { opacity: 1; }
     }
+
+    .help-modal {
+        display: none;
+        position: fixed;
+        z-index: 2000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(5px);
+        animation: fadeIn 0.3s ease;
+    }
+
+    .help-modal-content {
+        background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
+        margin: 10% auto;
+        padding: 20px;
+        border-radius: 15px;
+        width: 90%;
+        max-width: 400px;
+        max-height: 70vh;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+    }
+
+    .help-modal-content::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .help-modal-content::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 3px;
+    }
+
+    .help-modal-content::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 3px;
+    }
+
+    .help-modal-content::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.5);
+    }
+
+    .help-modal-content h2 {
+        color: white;
+        margin-bottom: 15px;
+        font-size: 20px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        text-align: center;
+    }
+
+    .help-section {
+        margin-bottom: 15px;
+        color: white;
+    }
+
+    .help-section h3 {
+        color: #4CAF50;
+        font-size: 16px;
+        margin-bottom: 8px;
+        border-bottom: 1px solid rgba(76, 175, 80, 0.3);
+        padding-bottom: 4px;
+    }
+
+    .help-section p {
+        font-size: 13px;
+        line-height: 1.4;
+        margin-bottom: 8px;
+        color: rgba(255, 255, 255, 0.9);
+    }
+
+    .help-section ul {
+        font-size: 12px;
+        line-height: 1.3;
+        margin-left: 15px;
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .help-section li {
+        margin-bottom: 4px;
+    }
+
+    .close-help-btn {
+        display: block;
+        width: 100%;
+        margin-top: 15px;
+        padding: 10px;
+        border: none;
+        border-radius: 8px;
+        background: linear-gradient(145deg, #666, #555);
+        color: white;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .close-help-btn:hover {
+        background: linear-gradient(145deg, #555, #666);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+    }
+
+    .close-help-btn:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
 </style>
 {% endblock %}
 
@@ -335,6 +462,7 @@
                     <div class="status-text" id="timer-display">⏱️ 4.000s</div>
                     <div class="status-text" id="level-display">Level: 1</div>
                     <div class="status-text pause-btn" id="pause-btn">⏸️</div>
+                    <div class="status-text help-btn" id="help-btn">❓</div>
                 </div>
 
                 
@@ -354,6 +482,79 @@
         <button id="resume-btn" class="modal-btn">Resume Game</button>
         <button id="return-menu-btn" class="modal-btn">Return to Menu</button>
         <button id="exit-game-btn" class="modal-btn">Exit Game</button>
+    </div>
+</div>
+
+<!-- Help Modal -->
+<div id="help-modal" class="help-modal">
+    <div class="help-modal-content">
+        <h2>🎮 Game Help</h2>
+        
+        <div class="help-section">
+            <h3>🎯 How to Play</h3>
+            <p>Drag and drop your player units to move them around the battlefield. Plan your strategy carefully!</p>
+            <ul>
+                <li>Touch and drag any player unit (green circles) to move them</li>
+                <li>You have 4 seconds to make your move once you leave your starting position</li>
+                <li>Enemy units (red circles) will move automatically</li>
+            </ul>
+        </div>
+
+        <div class="help-section">
+            <h3>⏱️ Timer System</h3>
+            <p>The timer starts counting down when you move outside your current grid cell:</p>
+            <ul>
+                <li>Timer shows remaining time in seconds</li>
+                <li>Make your move before time runs out</li>
+                <li>Timer resets after each turn</li>
+            </ul>
+        </div>
+
+        <div class="help-section">
+            <h3>🎮 Controls</h3>
+            <p>Game controls and interface elements:</p>
+            <ul>
+                <li>⏸️ Pause - Pause the game anytime</li>
+                <li>❓ Help - Open this help menu</li>
+                <li>HP bars show unit health</li>
+                <li>Level indicator shows current stage</li>
+            </ul>
+        </div>
+
+        <div class="help-section">
+            <h3>🗿 Terrain Elements</h3>
+            <p>Watch out for special terrain that can affect your units:</p>
+            <ul>
+                <li>Spikes - Deal damage when stepped on</li>
+                <li>Poison - Continuous damage over time</li>
+                <li>Some terrain may provide bonuses</li>
+            </ul>
+        </div>
+
+        <div class="help-section">
+            <h3>💡 Strategy Tips</h3>
+            <p>Master these tactics to become a better player:</p>
+            <ul>
+                <li>Keep your units close together for support</li>
+                <li>Use terrain to your advantage</li>
+                <li>Plan multiple moves ahead</li>
+                <li>Protect wounded units behind healthy ones</li>
+                <li>Corner enemies when possible</li>
+            </ul>
+        </div>
+
+        <div class="help-section">
+            <h3>⚔️ Combat Tips</h3>
+            <p>Effective battle strategies:</p>
+            <ul>
+                <li>Attack from multiple directions</li>
+                <li>Focus fire on single targets</li>
+                <li>Use ranged units from safe distances</li>
+                <li>Block enemy movement paths</li>
+            </ul>
+        </div>
+
+        <button id="close-help-btn" class="close-help-btn">Got it!</button>
     </div>
 </div>
 
@@ -410,6 +611,11 @@ function initializePauseModal() {
     const returnMenuBtn = document.getElementById('return-menu-btn');
     const exitGameBtn = document.getElementById('exit-game-btn');
 
+    // Help modal elements
+    const helpBtn = document.getElementById('help-btn');
+    const helpModal = document.getElementById('help-modal');
+    const closeHelpBtn = document.getElementById('close-help-btn');
+
     // Open pause modal
     pauseBtn.addEventListener('click', function() {
         pauseGame();
@@ -441,6 +647,37 @@ function initializePauseModal() {
     document.querySelector('.pause-modal-content').addEventListener('click', function(e) {
         e.stopPropagation();
     });
+
+    // Help modal event listeners
+    helpBtn.addEventListener('click', function() {
+        openHelpModal();
+    });
+
+    closeHelpBtn.addEventListener('click', function() {
+        closeHelpModal();
+    });
+
+    // Close help modal when clicking outside
+    helpModal.addEventListener('click', function(e) {
+        if (e.target === helpModal) {
+            closeHelpModal();
+        }
+    });
+
+    // Prevent help modal content clicks from closing modal
+    document.querySelector('.help-modal-content').addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+}
+
+function openHelpModal() {
+    document.getElementById('help-modal').style.display = 'block';
+    console.log('❓ Help modal opened');
+}
+
+function closeHelpModal() {
+    document.getElementById('help-modal').style.display = 'none';
+    console.log('❓ Help modal closed');
 }
 
 function pauseGame() {
