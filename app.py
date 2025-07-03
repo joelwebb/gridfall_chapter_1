@@ -12,7 +12,7 @@ def login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-        if username == "demo" and password == "Pa$$w@rd123*9!":
+        if username == "demo" and password == "demo":
             session['username'] = username
             return redirect('/dashboard')
     return render_template('login.html')
