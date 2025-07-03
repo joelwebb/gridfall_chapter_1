@@ -36,11 +36,11 @@
 
     .grid {
         display: grid;
-        grid-template-columns: repeat(5, 1fr);
+        grid-template-columns: repeat(6, 1fr);
         grid-template-rows: repeat(7, 1fr);
         gap: 1px;
         width: 100%;
-        max-width: 500px;
+        max-width: 600px;
         height: 420px;
         margin: 0 auto;
         background: rgba(0, 0, 0, 0.3);
@@ -164,13 +164,13 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-// Generate 7x5 grid (7 rows, 5 columns = 35 cells)
+// Generate 6x7 grid (7 rows, 6 columns = 42 cells)
 document.addEventListener('DOMContentLoaded', function() {
     const grid = document.getElementById('grid');
 
     // Create grid cells
     for (let row = 0; row < 7; row++) {
-        for (let col = 0; col < 5; col++) {
+        for (let col = 0; col < 6; col++) {
             const cell = document.createElement('div');
             cell.className = 'grid-cell';
             cell.setAttribute('data-row', row);
@@ -181,7 +181,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Calculate cell position helper
     function getCellPosition(row, col) {
-        const cellWidth = (grid.offsetWidth - 20) / 5; // subtract padding
+        const cellWidth = (grid.offsetWidth - 20) / 6; // subtract padding
         const cellHeight = (grid.offsetHeight - 20) / 7; // subtract padding
         return {
             left: 10 + (col * cellWidth) + (cellWidth / 2) - 20, // center unit in cell
@@ -200,7 +200,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const enemies = [
         { id: 'enemy1', name: 'G', hp: 50, row: 0, col: 1 },
         { id: 'enemy2', name: 'O', hp: 70, row: 1, col: 3 },
-        { id: 'enemy3', name: 'T', hp: 60, row: 0, col: 4 }
+        { id: 'enemy3', name: 'T', hp: 60, row: 0, col: 5 }
     ];
 
     // Add player units to grid
@@ -239,7 +239,7 @@ document.addEventListener('DOMContentLoaded', function() {
         grid.appendChild(enemyDiv);
     });
 
-    console.log('✅ Grid created successfully: 7 rows × 5 columns with units');
+    console.log('✅ Grid created successfully: 7 rows × 6 columns with units');
 });
 </script>
 {% endblock %}
