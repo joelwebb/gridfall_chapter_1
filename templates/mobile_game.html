@@ -1,367 +1,363 @@
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mobile Battle Grid</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+{% extends "layout.html" %}
 
-        body {
-            background: linear-gradient(135deg, #1e3c72, #2a5298);
-            font-family: 'Arial', sans-serif;
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
+{% block title %}Mobile Battle Grid{% endblock %}
 
-        .container {
-            padding: 10px;
-            max-width: 100vw;
-        }
+{% block stylesheets %}
+<style>
+    .mobile-game-container {
+        padding: 15px;
+        max-width: 100vw;
+    }
 
-        .card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 15px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            margin: 0 auto;
-        }
+    .mobile-card {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 15px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        margin: 0 auto;
+    }
 
-        .card-title {
-            color: white;
-            text-align: center;
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 15px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-        }
+    .mobile-card-title {
+        color: white;
+        text-align: center;
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 15px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
 
-        .game-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-            gap: 10px;
-        }
+    .game-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        gap: 10px;
+    }
 
-        .status-text {
-            background: rgba(0, 0, 0, 0.5);
-            color: white;
-            padding: 6px 10px;
-            border-radius: 6px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            font-size: 12px;
-            font-weight: bold;
-        }
+    .status-text {
+        background: rgba(0, 0, 0, 0.5);
+        color: white;
+        padding: 6px 10px;
+        border-radius: 6px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        font-size: 12px;
+        font-weight: bold;
+    }
 
+    .game-grid {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        grid-template-rows: repeat(7, 1fr);
+        gap: 1px;
+        width: 100%;
+        max-width: 360px;
+        height: 280px;
+        margin: 0 auto;
+        background: rgba(0, 0, 0, 0.4);
+        border-radius: 8px;
+        padding: 8px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .grid-cell {
+        background: linear-gradient(145deg, #3a5998, #2d4a7d);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 3px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 8px;
+        color: rgba(255, 255, 255, 0.6);
+        min-height: 35px;
+        transition: all 0.2s ease;
+    }
+
+    .grid-cell:active {
+        background: linear-gradient(145deg, #4a69a8, #3d5a8d);
+        transform: scale(0.95);
+    }
+
+    .player-unit {
+        position: absolute;
+        width: 28px;
+        height: 28px;
+        background: radial-gradient(circle, #4CAF50, #2E7D32);
+        border: 2px solid #fff;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 11px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+        z-index: 10;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        cursor: pointer;
+    }
+
+    .enemy-unit {
+        position: absolute;
+        width: 28px;
+        height: 28px;
+        background: radial-gradient(circle, #f44336, #c62828);
+        border: 2px solid #fff;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 11px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+        z-index: 10;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .unit-hp {
+        position: absolute;
+        bottom: -12px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.9);
+        color: white;
+        font-size: 7px;
+        padding: 1px 3px;
+        border-radius: 3px;
+        white-space: nowrap;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .mobile-controls {
+        text-align: center;
+        margin-top: 15px;
+    }
+
+    .mobile-btn {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-size: 12px;
+        margin: 0 5px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .mobile-btn:active {
+        background: rgba(255, 255, 255, 0.3);
+        transform: scale(0.95);
+    }
+
+    /* Smaller screens */
+    @media (max-width: 400px) {
         .game-grid {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            grid-template-rows: repeat(7, 1fr);
-            gap: 1px;
-            width: 100%;
-            max-width: 360px;
-            height: 280px;
-            margin: 0 auto;
-            background: rgba(0, 0, 0, 0.4);
-            border-radius: 8px;
-            padding: 8px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            max-width: 320px;
+            height: 240px;
+            gap: 0.5px;
+            padding: 6px;
         }
 
         .grid-cell {
-            background: linear-gradient(145deg, #3a5998, #2d4a7d);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 3px;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 8px;
-            color: rgba(255, 255, 255, 0.6);
-            min-height: 35px;
-            transition: all 0.2s ease;
+            min-height: 30px;
+            font-size: 7px;
         }
 
-        .grid-cell:active {
-            background: linear-gradient(145deg, #4a69a8, #3d5a8d);
-            transform: scale(0.95);
-        }
-
-        .player-unit {
-            position: absolute;
-            width: 28px;
-            height: 28px;
-            background: radial-gradient(circle, #4CAF50, #2E7D32);
-            border: 2px solid #fff;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: 11px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-            z-index: 10;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            cursor: pointer;
-        }
-
-        .enemy-unit {
-            position: absolute;
-            width: 28px;
-            height: 28px;
-            background: radial-gradient(circle, #f44336, #c62828);
-            border: 2px solid #fff;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: 11px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-            z-index: 10;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+        .player-unit, .enemy-unit {
+            width: 24px;
+            height: 24px;
+            font-size: 9px;
         }
 
         .unit-hp {
-            position: absolute;
-            bottom: -12px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.9);
-            color: white;
-            font-size: 7px;
-            padding: 1px 3px;
-            border-radius: 3px;
-            white-space: nowrap;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            font-size: 6px;
+            bottom: -10px;
         }
 
-        .controls {
-            text-align: center;
-            margin-top: 15px;
+        .mobile-card-title {
+            font-size: 18px;
         }
+    }
 
-        .btn {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-size: 12px;
-            margin: 0 5px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
+    .pulse {
+        animation: pulse 0.5s ease-in-out;
+    }
 
-        .btn:active {
-            background: rgba(255, 255, 255, 0.3);
-            transform: scale(0.95);
-        }
+    @keyframes pulse {
+        0% { transform: translate(-50%, -50%) scale(1); }
+        50% { transform: translate(-50%, -50%) scale(1.2); }
+        100% { transform: translate(-50%, -50%) scale(1); }
+    }
 
-        /* Smaller screens */
-        @media (max-width: 400px) {
-            .game-grid {
-                max-width: 320px;
-                height: 240px;
-                gap: 0.5px;
-                padding: 6px;
-            }
+    /* Override main content area for mobile game */
+    .pcoded-main-container .pcoded-content {
+        background: linear-gradient(135deg, #1e3c72, #2a5298);
+        min-height: 100vh;
+    }
+</style>
+{% endblock %}
 
-            .grid-cell {
-                min-height: 30px;
-                font-size: 7px;
-            }
+{% block content %}
+<div class="pcoded-main-container">
+    <div class="pcoded-content">
+        <div class="mobile-game-container">
+            <div class="mobile-card">
+                <div class="mobile-card-title">Mobile Battle Grid (6×7)</div>
 
-            .player-unit, .enemy-unit {
-                width: 24px;
-                height: 24px;
-                font-size: 9px;
-            }
+                <div class="game-info">
+                    <div class="status-text">Turn: Player</div>
+                    <div class="status-text">Grid: 6×7</div>
+                </div>
 
-            .unit-hp {
-                font-size: 6px;
-                bottom: -10px;
-            }
+                <div class="game-grid" id="gameGrid">
+                    <!-- Grid cells will be generated by JavaScript -->
+                </div>
 
-            .card-title {
-                font-size: 18px;
-            }
-        }
-
-        .pulse {
-            animation: pulse 0.5s ease-in-out;
-        }
-
-        @keyframes pulse {
-            0% { transform: translate(-50%, -50%) scale(1); }
-            50% { transform: translate(-50%, -50%) scale(1.2); }
-            100% { transform: translate(-50%, -50%) scale(1); }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="card">
-            <div class="card-title">Mobile Battle Grid (6×7)</div>
-
-            <div class="game-info">
-                <div class="status-text">Turn: Player</div>
-                <div class="status-text">Grid: 6×7</div>
-            </div>
-
-            <div class="game-grid" id="gameGrid">
-                <!-- Grid cells will be generated by JavaScript -->
-            </div>
-
-            <div class="controls">
-                <button class="btn" onclick="resetGame()">Reset</button>
-                <button class="btn" onclick="nextTurn()">Next Turn</button>
+                <div class="mobile-controls">
+                    <button class="mobile-btn" onclick="resetGame()">Reset</button>
+                    <button class="mobile-btn" onclick="nextTurn()">Next Turn</button>
+                </div>
             </div>
         </div>
     </div>
+</div>
 
-    <script>
-    console.log('🎮 Mobile Game Starting...');
+<script>
+console.log('🎮 Mobile Game Starting...');
 
-    document.addEventListener('DOMContentLoaded', function() {
-        initializeGame();
+document.addEventListener('DOMContentLoaded', function() {
+    initializeGame();
+});
+
+function initializeGame() {
+    const grid = document.getElementById('gameGrid');
+
+    if (!grid) {
+        console.error('❌ Grid element not found!');
+        return;
+    }
+
+    // Clear any existing content
+    grid.innerHTML = '';
+
+    // Create 6x7 grid (42 cells total)
+    const rows = 7;
+    const cols = 6;
+
+    console.log('📐 Creating ' + rows + '×' + cols + ' grid');
+
+    // Generate grid cells
+    for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+            const cell = document.createElement('div');
+            cell.className = 'grid-cell';
+            cell.setAttribute('data-row', row);
+            cell.setAttribute('data-col', col);
+            cell.title = 'Cell (' + row + ',' + col + ')';
+            
+            // Add click handler
+            cell.addEventListener('click', function() {
+                handleCellClick(row, col);
+            });
+            
+            grid.appendChild(cell);
+        }
+    }
+
+    // Sample game units
+    const gameUnits = [
+        { id: 'player1', name: 'H', hp: 100, maxHp: 100, row: 6, col: 1, type: 'player' },
+        { id: 'player2', name: 'M', hp: 80, maxHp: 100, row: 6, col: 3, type: 'player' },
+        { id: 'player3', name: 'A', hp: 90, maxHp: 100, row: 5, col: 2, type: 'player' },
+        { id: 'enemy1', name: 'G', hp: 50, maxHp: 60, row: 0, col: 1, type: 'enemy' },
+        { id: 'enemy2', name: 'O', hp: 70, maxHp: 80, row: 1, col: 3, type: 'enemy' },
+        { id: 'enemy3', name: 'T', hp: 40, maxHp: 60, row: 0, col: 5, type: 'enemy' }
+    ];
+
+    // Create and position units
+    gameUnits.forEach(function(unit) {
+        createUnit(unit);
     });
 
-    function initializeGame() {
-        const grid = document.getElementById('gameGrid');
+    console.log('🎉 Mobile game initialized successfully!');
+    console.log('📊 Grid: ' + rows + ' rows × ' + cols + ' columns');
+    console.log('👥 Players: 3, Enemies: 3');
+}
 
-        if (!grid) {
-            console.error('❌ Grid element not found!');
-            return;
-        }
-
-        // Clear any existing content
-        grid.innerHTML = '';
-
-        // Create 6x7 grid (42 cells total)
-        const rows = 7;
-        const cols = 6;
-
-        console.log('📐 Creating ' + rows + '×' + cols + ' grid');
-
-        // Generate grid cells
-        for (let row = 0; row < rows; row++) {
-            for (let col = 0; col < cols; col++) {
-                const cell = document.createElement('div');
-                cell.className = 'grid-cell';
-                cell.setAttribute('data-row', row);
-                cell.setAttribute('data-col', col);
-                cell.title = 'Cell (' + row + ',' + col + ')';
-                
-                // Add click handler
-                cell.addEventListener('click', function() {
-                    handleCellClick(row, col);
-                });
-                
-                grid.appendChild(cell);
-            }
-        }
-
-        // Sample game units
-        const gameUnits = [
-            { id: 'player1', name: 'H', hp: 100, maxHp: 100, row: 6, col: 1, type: 'player' },
-            { id: 'player2', name: 'M', hp: 80, maxHp: 100, row: 6, col: 3, type: 'player' },
-            { id: 'player3', name: 'A', hp: 90, maxHp: 100, row: 5, col: 2, type: 'player' },
-            { id: 'enemy1', name: 'G', hp: 50, maxHp: 60, row: 0, col: 1, type: 'enemy' },
-            { id: 'enemy2', name: 'O', hp: 70, maxHp: 80, row: 1, col: 3, type: 'enemy' },
-            { id: 'enemy3', name: 'T', hp: 40, maxHp: 60, row: 0, col: 5, type: 'enemy' }
-        ];
-
-        // Create and position units
-        gameUnits.forEach(function(unit) {
-            createUnit(unit);
-        });
-
-        console.log('🎉 Mobile game initialized successfully!');
-        console.log('📊 Grid: ' + rows + ' rows × ' + cols + ' columns');
-        console.log('👥 Players: 3, Enemies: 3');
+function createUnit(unit) {
+    // Find the target cell
+    const targetCell = document.querySelector('[data-row="' + unit.row + '"][data-col="' + unit.col + '"]');
+    if (!targetCell) {
+        console.error('❌ Target cell not found for unit:', unit.name);
+        return;
     }
 
-    function createUnit(unit) {
-        // Find the target cell
-        const targetCell = document.querySelector('[data-row="' + unit.row + '"][data-col="' + unit.col + '"]');
-        if (!targetCell) {
-            console.error('❌ Target cell not found for unit:', unit.name);
-            return;
-        }
+    const unitDiv = document.createElement('div');
+    unitDiv.id = unit.id;
+    unitDiv.className = unit.type + '-unit';
+    unitDiv.textContent = unit.name;
+    unitDiv.title = unit.name + ' (' + unit.type + ') - HP: ' + unit.hp + '/' + unit.maxHp;
 
-        const unitDiv = document.createElement('div');
-        unitDiv.id = unit.id;
-        unitDiv.className = unit.type + '-unit';
-        unitDiv.textContent = unit.name;
-        unitDiv.title = unit.name + ' (' + unit.type + ') - HP: ' + unit.hp + '/' + unit.maxHp;
+    const hpLabel = document.createElement('div');
+    hpLabel.className = 'unit-hp';
+    hpLabel.textContent = unit.hp + 'HP';
+    unitDiv.appendChild(hpLabel);
 
-        const hpLabel = document.createElement('div');
-        hpLabel.className = 'unit-hp';
-        hpLabel.textContent = unit.hp + 'HP';
-        unitDiv.appendChild(hpLabel);
+    // Add click handler
+    unitDiv.addEventListener('click', function(e) {
+        e.stopPropagation();
+        handleUnitClick(unit);
+    });
 
-        // Add click handler
-        unitDiv.addEventListener('click', function(e) {
-            e.stopPropagation();
-            handleUnitClick(unit);
-        });
+    // Position unit in the cell
+    targetCell.style.position = 'relative';
+    targetCell.appendChild(unitDiv);
+    
+    console.log('✅ Added ' + unit.type + ' unit: ' + unit.name + ' at (' + unit.row + ',' + unit.col + ')');
+}
 
-        // Position unit in the cell
-        targetCell.style.position = 'relative';
-        targetCell.appendChild(unitDiv);
-        
-        console.log('✅ Added ' + unit.type + ' unit: ' + unit.name + ' at (' + unit.row + ',' + unit.col + ')');
+function handleCellClick(row, col) {
+    console.log('🎯 Clicked cell: (' + row + ',' + col + ')');
+    // Add visual feedback
+    const cell = document.querySelector('[data-row="' + row + '"][data-col="' + col + '"]');
+    if (cell) {
+        cell.style.background = 'linear-gradient(145deg, #4a69a8, #3d5a8d)';
+        setTimeout(function() {
+            cell.style.background = 'linear-gradient(145deg, #3a5998, #2d4a7d)';
+        }, 200);
     }
+}
 
-    function handleCellClick(row, col) {
-        console.log('🎯 Clicked cell: (' + row + ',' + col + ')');
-        // Add visual feedback
-        const cell = document.querySelector('[data-row="' + row + '"][data-col="' + col + '"]');
-        if (cell) {
-            cell.style.background = 'linear-gradient(145deg, #4a69a8, #3d5a8d)';
-            setTimeout(function() {
-                cell.style.background = 'linear-gradient(145deg, #3a5998, #2d4a7d)';
-            }, 200);
-        }
+function handleUnitClick(unit) {
+    console.log('🎯 Clicked unit: ' + unit.name + ' (' + unit.type + ')');
+    
+    // Add pulse animation
+    const unitElement = document.getElementById(unit.id);
+    if (unitElement) {
+        unitElement.classList.add('pulse');
+        setTimeout(function() {
+            unitElement.classList.remove('pulse');
+        }, 500);
     }
+}
 
-    function handleUnitClick(unit) {
-        console.log('🎯 Clicked unit: ' + unit.name + ' (' + unit.type + ')');
-        
-        // Add pulse animation
-        const unitElement = document.getElementById(unit.id);
-        if (unitElement) {
-            unitElement.classList.add('pulse');
-            setTimeout(function() {
-                unitElement.classList.remove('pulse');
-            }, 500);
-        }
-    }
+function resetGame() {
+    console.log('🔄 Resetting game...');
+    initializeGame();
+}
 
-    function resetGame() {
-        console.log('🔄 Resetting game...');
-        initializeGame();
-    }
-
-    function nextTurn() {
-        console.log('⏭️ Next turn...');
-        // Add turn logic here
-    }
-    </script>
-</body>
-</html>
+function nextTurn() {
+    console.log('⏭️ Next turn...');
+    // Add turn logic here
+}
+</script>
+{% endblock %}
